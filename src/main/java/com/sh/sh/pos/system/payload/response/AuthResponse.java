@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.payload.response;
 import com.sh.sh.pos.system.payload.dto.UserDTO;
 
 import lombok.Data;
+ 
 
 @Data
 public class AuthResponse {

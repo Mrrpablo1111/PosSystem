@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 	
-	private final AuthService authService;
+	private final   AuthService authService;
 	
 	@PostMapping("/register")
 	public ResponseEntity<AuthResponse> registerHandler(@RequestBody UserDTO userDTO)throws UserException{

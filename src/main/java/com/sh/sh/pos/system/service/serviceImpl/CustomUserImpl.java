@@ -1,6 +1,6 @@
 package com.sh.sh.pos.system.service.serviceImpl;
 
-import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.model.User;  
 import com.sh.sh.pos.system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+
 import java.util.Collection;
 import java.util.Collections;
 
