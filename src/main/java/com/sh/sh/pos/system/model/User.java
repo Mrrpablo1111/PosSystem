@@ -1,13 +1,13 @@
-package com.sh.sh.pos .system.model;
+package com.sh.sh.pos.system.model;
 
 import com.sh.sh.pos.system.domain.UserRole;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
+
+
 
 public class User {
     @Id
@@ -34,6 +36,8 @@ public class User {
 
     @Column(nullable = false)
     private UserRole role;
+    
+    @Column(nullable = false)
     private String password;
 
     private LocalDateTime createdAt;

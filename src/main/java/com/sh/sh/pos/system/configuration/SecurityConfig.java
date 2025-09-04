@@ -1,6 +1,7 @@
 package com.sh.sh.pos.system.configuration;
 
-import jakarta.servlet.http.HttpServletRequest;
+
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,19 +14,23 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.Arrays;
 
 import java.util.Collections;
-import java.util.List;
+
 
 @Configuration
 public class SecurityConfig {
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	 
+	@Bean
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.sessionManagement(
                         management -> management
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(Authorize -> Authorize.requestMatchers("/api/**").authenticated()
-                        .requestMatchers("/api/admin/**").hasRole("ROLE_ADMIN")
+                        .requestMatchers("/api/super-admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtValidator(),
                         BasicAuthenticationFilter.class)
@@ -34,7 +39,7 @@ public class SecurityConfig {
 
     }
 
-    @Bean
+   @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
@@ -50,7 +55,7 @@ public class SecurityConfig {
                 cfg.setAllowedMethods(Collections.singletonList("*"));
                 cfg.setAllowCredentials(true);
                 cfg.setAllowedHeaders(Collections.singletonList("*"));
-                cfg.setExposedHeaders(List.of("Authorization"));
+                cfg.setExposedHeaders(Arrays.asList("Authorization"));
                 cfg.setMaxAge(3600L);
                 return cfg;
             }
