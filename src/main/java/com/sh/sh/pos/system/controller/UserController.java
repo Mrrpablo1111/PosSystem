@@ -30,11 +30,9 @@ public class UserController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<UserDTO> getUserById(@RequestHeader("Authorization") String jwt,@PathVariable Long id) throws UserException{
+	public ResponseEntity<UserDTO> getUserById(@RequestHeader("Authorization") String jwt,@PathVariable Long id) throws UserException, Exception{
 		User user = userService.getUserById(id);
-		if(user == null) {
-			throw new UserException("user not found");
-		}
+		
 		return ResponseEntity.ok(UserMapper.toDTO(user));
 	}
 	
