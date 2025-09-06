@@ -5,9 +5,11 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.sh.sh.pos.system.domain.StoreStatus;
 import com.sh.sh.pos.system.exceptions.UserException;
 import com.sh.sh.pos.system.mapper.StoreMapper;
 import com.sh.sh.pos.system.model.Store;
+import com.sh.sh.pos.system.model.StoreContact;
 import com.sh.sh.pos.system.model.User;
 import com.sh.sh.pos.system.payload.dto.StoreDTO;
 import com.sh.sh.pos.system.repository.StoreRepository;
@@ -32,8 +34,8 @@ public class StoreServiceImpl implements StoreService {
 
 	@Override
 	public StoreDTO getStoreById(Long id) throws Exception {
-		storeRepository.findById(id).orElseThrow(()-> new Exception("store not found"));
-		return StoreMapper.toDTO(getStoreByAdmin());
+		Store store = storeRepository.findById(id).orElseThrow(()-> new Exception("store not found"));
+		return StoreMapper.toDTO(store);
 	}
 
 	@Override
@@ -66,16 +68,23 @@ public class StoreServiceImpl implements StoreService {
 			existing.setStoreType(storeDTO.getStoreType());
 		}
 		if(storeDTO.getContact()!=null) {
-			StoreContact 
+			StoreContact contact = StoreContact.builder()
+					.address(storeDTO.getContact().getAddress())
+					.phone(storeDTO.getContact().getPhone())
+					.email(storeDTO.getContact().getEmail())
+					.build();
+			existing.setContact(contact);
 		}
+		Store updateStore = storeRepository.save(existing);
 		
-		return null;
+		return StoreMapper.toDTO(updateStore);
 	}
 
 	@Override
-	public StoreDTO deletedStore(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+	public void deletedStore(Long id) throws UserException {
+		Store store = getStoreByAdmin();
+		storeRepository.delete(store);
+	
 	}
 
 	@Override
@@ -86,6 +95,14 @@ public class StoreServiceImpl implements StoreService {
 			throw new UserException("you don't have permission to access this store");
 		}
 		return StoreMapper.toDTO(currentUser.getStore()); 
+	}
+
+	@Override
+	public StoreDTO moderateStore(Long id, StoreStatus status) throws Exception {
+		Store store = storeRepository.findById(id).orElseThrow(()-> new Exception("store not found"));
+		store.setStatus(status);
+		Store updatedStore=storeRepository.save(store);
+		return StoreMapper.toDTO(updatedStore) ;
 	}
 
 }
