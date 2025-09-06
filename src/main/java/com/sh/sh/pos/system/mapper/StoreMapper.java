@@ -32,7 +32,7 @@ public class StoreMapper {
 		store.setDescription(storeDTO.getDescription());
 		store.setContact(storeDTO.getContact());
 		store.setStatus(storeDTO.getStatus());
-		store.setStoreType(store.getStoreType());
+		store.setStoreType(storeDTO.getStoreType());
 		store.setCreatedAt(storeDTO.getCreatedAt());
 		store.setUpdatedAt(storeDTO.getUpdatedAt());
 		store.setStatus(storeDTO.getStatus());
