@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,12 +59,14 @@ public class StoreController {
 	}
 
 	@GetMapping("/employee")
+	
 	public ResponseEntity<StoreDTO> getStoreByEmployee(@RequestHeader("Authorization") String jwt)
 			throws UserException {
 		return ResponseEntity.ok(storeService.getStoreByEmployee());
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_STORE_ADMIN')")  
 	public ResponseEntity<StoreDTO> updateStore(@PathVariable Long id, @RequestHeader("Authorization") String jwt,
 			@RequestBody StoreDTO storeDTO) throws UserException {
 		return ResponseEntity.ok(storeService.updateStore(id, storeDTO));
