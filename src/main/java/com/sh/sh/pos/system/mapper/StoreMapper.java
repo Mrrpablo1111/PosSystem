@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.mapper;
+ package com.sh.sh.pos.system.mapper;
 
 import com.sh.sh.pos.system.model.Store;
 import com.sh.sh.pos.system.model.User;

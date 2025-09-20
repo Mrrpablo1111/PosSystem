@@ -1,7 +1,6 @@
 package com.sh.sh.pos.system.domain;
 
-public enum UserRole {
-    ROLE_USER, 
+public enum UserRole { 
     ROLE_ADMIN,
     ROLE_STORE_ADMIN,
     ROLE_CASHIER,
