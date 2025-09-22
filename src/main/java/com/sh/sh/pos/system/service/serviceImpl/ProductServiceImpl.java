@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.sh.sh.pos.system.model.User;
 import com.sh.sh.pos.system.payload.dto.ProductDTO;
+import com.sh.sh.pos.system.repository.ProductRepository;
 import com.sh.sh.pos.system.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor 
 public class ProductServiceImpl implements ProductService {
+	
+	private final ProductRepository productRepository;
 
 	@Override
 	public ProductDTO createProduct(ProductDTO productDTO, User user) {
