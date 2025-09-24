@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.sh.sh.pos.system.model.Store;
 import com.sh.sh.pos.system.model.User;
 import com.sh.sh.pos.system.payload.dto.ProductDTO;
 import com.sh.sh.pos.system.repository.ProductRepository;
+import com.sh.sh.pos.system.repository.StoreRepository;
 import com.sh.sh.pos.system.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,9 +19,12 @@ public class ProductServiceImpl implements ProductService {
 	
 	private final ProductRepository productRepository;
 
+	private final StoreRepository storeRepository;
 	@Override
-	public ProductDTO createProduct(ProductDTO productDTO, User user) {
-		// TODO Auto-generated method stub
+	public ProductDTO createProduct(ProductDTO productDTO, User user) throws Exception {
+		Store store = storeRepository.findById(productDTO.getStoreId()).orElseThrow(
+				() -> new Exception("Store not found ")
+				)
 		return null;
 	} 
 
