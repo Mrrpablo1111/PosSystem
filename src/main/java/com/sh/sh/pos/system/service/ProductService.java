@@ -7,8 +7,8 @@ import com.sh.sh.pos.system.payload.dto.ProductDTO;
 
 public interface ProductService {
 	
-	ProductDTO createProduct(ProductDTO productDTO, User user);
-	ProductDTO updateProduct(Long id, ProductDTO productDTO, User user);
+	ProductDTO createProduct(ProductDTO productDTO, User user) throws Exception;
+	ProductDTO updateProduct(Long id, ProductDTO productDTO, User user) throws Exception;
 	
 	void deleteProduct(Long id, User user);
 	
