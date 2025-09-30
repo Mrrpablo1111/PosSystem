@@ -2,6 +2,7 @@ package com.sh.sh.pos.system.service.serviceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -54,21 +55,27 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public void deleteProduct(Long id, User user) {
-		// TODO Auto-generated method stub
+	public void deleteProduct(Long id, User user) throws Exception {
+		Product product = productRepository.findById(id).orElseThrow(
+				() -> new Exception("product not found")
+				);
+		productRepository.delete(product);
 		
 	}
 
 	@Override
 	public List<ProductDTO> getProductByStoreId(Long storeId) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Product> products = productRepository.findByStoreId(storeId);
+		
+		return products.stream().map(ProductMapper::toDTO).collect(Collectors.toList());
 	}
 
 	@Override
 	public List<ProductDTO> searchBykeyword(Long storeId, String keyword) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Product> products = productRepository.searchByKeyword(storeId, keyword);
+		
+		return products.stream()
+				.map(ProductMapper::toDTO).collect(Collectors.toList());
 	}
 
 }
