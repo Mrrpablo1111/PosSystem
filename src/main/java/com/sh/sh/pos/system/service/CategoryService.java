@@ -8,6 +8,6 @@ import com.sh.sh.pos.system.payload.dto.CategoryDTO;
 public interface CategoryService {
 	CategoryDTO createCategory(CategoryDTO dto) throws UserException, Exception;  
 	List<CategoryDTO> getCategoriesByStore(Long storeId);
-	CategoryDTO updateCategory(Long id, CategoryDTO dto);
-	void deleteCategory(Long id);
+	CategoryDTO updateCategory(Long id, CategoryDTO dto) throws Exception;
+	void deleteCategory(Long id) throws Exception;
 }
