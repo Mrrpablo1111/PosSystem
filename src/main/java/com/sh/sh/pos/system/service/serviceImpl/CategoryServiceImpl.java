@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 
-public class CategroyServiceImpl implements CategoryService{
+public class CategoryServiceImpl implements CategoryService{
 	
 	private final CategoryRepository categoryRepository;
 	private final UserService userService;

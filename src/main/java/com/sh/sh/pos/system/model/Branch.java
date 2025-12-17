@@ -1,14 +1,17 @@
 package com.sh.sh.pos.system.model;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
-
-import jakarta.persistence.Column;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
@@ -17,44 +20,45 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 @Builder
-public class Product {
-	
+
+public class Branch {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(nullable = false)
 	private String name;
 	
-	@Column(nullable = false, unique = true)
-	private String sku;
+	private String address;
 	
-	private String description;
+	private String phone;
+
+	private String email;
 	
-	private Double mrp;
 	
-	private Double sellingPrice;
-	private String brand;
-	 
-	private String image;
+	@ElementCollection
+	private List<String> workingDays;
 	
-	@ManyToOne 
-	private Category category;  
+	private LocalTime openTime;
 	
-	@ManyToOne
-	private Store store;
+	private LocalTime closeTime;
 	
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	
+	@ManyToOne
+	private Store store;
+	
+	@OneToOne(cascade = CascadeType.REMOVE)
+	private User manager;
+	
 	@PrePersist
-	protected void onCreate() {
+	protected void onCreated() {
 		createdAt = LocalDateTime.now();
 	}
 	

@@ -1,9 +1,11 @@
 package com.sh.sh.pos.system.model;
 
-import org.springframework.data.annotation.Id;
 
+
+import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +17,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity
 @Builder
 public class Category {
 	
@@ -25,7 +28,6 @@ public class Category {
 	
 	@ManyToOne
 	private Store store;
-	
 	
 	
 }

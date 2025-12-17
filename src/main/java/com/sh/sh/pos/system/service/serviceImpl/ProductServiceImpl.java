@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl;
+ package com.sh.sh.pos.system.service.serviceImpl;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,10 +7,12 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.sh.sh.pos.system.mapper.ProductMapper;
+import com.sh.sh.pos.system.model.Category;
 import com.sh.sh.pos.system.model.Product;
 import com.sh.sh.pos.system.model.Store;
 import com.sh.sh.pos.system.model.User;
 import com.sh.sh.pos.system.payload.dto.ProductDTO;
+import com.sh.sh.pos.system.repository.CategoryRepository;
 import com.sh.sh.pos.system.repository.ProductRepository;
 import com.sh.sh.pos.system.repository.StoreRepository;
 import com.sh.sh.pos.system.service.ProductService;
@@ -24,12 +26,18 @@ public class ProductServiceImpl implements ProductService {
 	private final ProductRepository productRepository;
 
 	private final StoreRepository storeRepository;
+	
+	private final CategoryRepository categoryRepository;
 	@Override
 	public ProductDTO createProduct(ProductDTO productDTO, User user) throws Exception {
 		Store store = storeRepository.findById(productDTO.getStoreId()).orElseThrow(
 				() -> new Exception("Store not found ")
 				);
-			Product product = ProductMapper.toEntity(productDTO, store);
+		
+			Category category = categoryRepository.findById(productDTO.getCategoryId()).orElseThrow(
+					() -> new Exception("Category not found")
+					);
+			Product product = ProductMapper.toEntity(productDTO, store, category);
 			Product savedProduct = productRepository.save(product);
 		return ProductMapper.toDTO(savedProduct);
 	} 
@@ -39,6 +47,8 @@ public class ProductServiceImpl implements ProductService {
 		Product product = productRepository.findById(id).orElseThrow(
 				() -> new Exception("product not found")
 				);
+			
+		
 		product.setName(productDTO.getName());
 		product.setDescription(productDTO.getDescription());
 		product.setSku(productDTO.getSku());
@@ -47,7 +57,11 @@ public class ProductServiceImpl implements ProductService {
 		product.setSellingPrice(productDTO.getSellingPrice());
 		product.setBrand(productDTO.getBrand());
 		product.setUpdatedAt(LocalDateTime.now());
-		
+		if(productDTO.getCategoryId()!=null) {
+			Category category = categoryRepository.findById(productDTO.getCategoryId()).orElseThrow(
+					() -> new Exception("category not found"));
+			product.setCategory(category);
+		}
 		Product savedProduct = productRepository.save(product);
 		
 				

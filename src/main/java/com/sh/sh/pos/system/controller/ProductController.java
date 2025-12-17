@@ -32,7 +32,7 @@ public class ProductController {
 	@PostMapping  
 	public ResponseEntity<ProductDTO> create(@RequestBody ProductDTO productDTO, @RequestHeader("Authorization") String jwt) throws Exception{
 		User user = userService.getUserFromJwtToken(jwt);
-		return ResponseEntity.ok(productService.createProduct(productDTO, null));
+		return ResponseEntity.ok(productService.createProduct(productDTO, user));
 	}
 	
 	@GetMapping("/store/{storeId}")
@@ -48,7 +48,7 @@ public class ProductController {
 	public ResponseEntity<List<ProductDTO>> searchByKeyword(
 			@PathVariable Long storeId,
 			@RequestParam String keyword, 
-			@RequestHeader("Authorization") String jwt){
+			@RequestHeader("Authorization")   String jwt){
 		return ResponseEntity.ok(productService.searchBykeyword(storeId, keyword)); 
 		
 	}
@@ -64,7 +64,7 @@ public class ProductController {
 						productService.updateProduct(id, productDTO, user)
 						);
 		
-	}
+	} 
 	
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse> delete(
