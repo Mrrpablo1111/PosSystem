@@ -27,6 +27,7 @@ public class BranchMapper {
 	public static Branch toEntity(BranchDTO branchDTO, Store store) {
 		return Branch.builder()
 				.name(branchDTO.getName())
+				.store(store)
 				.address(branchDTO.getAddress())
 				.phone(branchDTO.getPhone())
 				.email(branchDTO.getEmail())

@@ -1,5 +1,6 @@
 package com.sh.sh.pos.system.service.serviceImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,10 +41,10 @@ public class BranchServiceImpl implements BranchService{
 	}
 
 	@Override
-	public BranchDTO updateBranch(Long id, BranchDTO branchDTO, User user) throws Exception {
+	public BranchDTO updateBranch(Long id, BranchDTO branchDTO) throws Exception {
 		Branch existing = branchRepository.findById(id).orElseThrow(
 				()-> new Exception("branch not exists...")
-				);
+				); 
 		
 		existing.setName(branchDTO.getName());
 		existing.setAddress(branchDTO.getAddress());
@@ -52,7 +53,7 @@ public class BranchServiceImpl implements BranchService{
 		existing.setPhone(branchDTO.getPhone());
 		existing.setOpenTime(branchDTO.getOpenTime());
 		existing.setCloseTime(branchDTO.getCloseTime());
-		existing.setUpdatedAt(branchDTO.getUpdatedAt());
+		existing.setUpdatedAt(LocalDateTime.now());
 		
 		Branch updatedBranch = branchRepository.save(existing);
 		
