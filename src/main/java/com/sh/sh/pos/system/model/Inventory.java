@@ -2,7 +2,6 @@ package com.sh.sh.pos.system.model;
 
 import java.time.LocalDateTime;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,54 +13,38 @@ import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @AllArgsConstructor
-@NoArgsConstructor
+@RequiredArgsConstructor
 @Entity
 @Builder
-public class Product {
-	
+
+public class Inventory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 	
-	@Column(nullable = false)
-	private String name;
-	
-	@Column(nullable = false, unique = true)
-	private String sku;
-	
-	private String description;
-	
-	private Double mrp;
-	
-	private Double sellingPrice;
-	private String brand;
-	 
-	private String image;
-	
-	@ManyToOne 
-	private Category category;  
+	@ManyToOne
+	private Branch branch;
 	
 	@ManyToOne
-	private Store store;
+	private Product product;
 	
-	private LocalDateTime createdAt;
-	private LocalDateTime updatedAt;
+	@Column(nullable = false)
+	private Integer quantity;
+	
+	private LocalDateTime lastUpdate;
 	
 	@PrePersist
-	protected void onCreate() {
-		createdAt = LocalDateTime.now();
-		
+	@PreUpdate
+	protected void onUpdate() {
+		lastUpdate = LocalDateTime.now();
 	}
 	
-	@PreUpdate
-	protected void onUpdated() {
-		updatedAt = LocalDateTime.now();
-	}
+	
 	
 }
