@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.model;
+ package com.sh.sh.pos.system.model;
 
 import java.time.LocalDateTime;
 

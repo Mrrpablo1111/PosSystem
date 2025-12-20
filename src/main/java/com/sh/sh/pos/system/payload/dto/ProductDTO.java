@@ -29,9 +29,6 @@ public class ProductDTO {
 	private CategoryDTO category;
 	
 	
-	
-	private StoreDTO storeDTO;
-	
 	private Long categoryId; 
 	private Long storeId;
 	
