@@ -16,6 +16,7 @@ import com.sh.sh.pos.system.model.OrderItem;
 import com.sh.sh.pos.system.model.Product;
 import com.sh.sh.pos.system.model.User;
 import com.sh.sh.pos.system.payload.dto.OrderDTO;
+import com.sh.sh.pos.system.repository.OrderItemRepository;
 import com.sh.sh.pos.system.repository.OrderRepository;
 import com.sh.sh.pos.system.repository.ProductRepository;
 import com.sh.sh.pos.system.service.OrderService;
@@ -30,7 +31,8 @@ public class OrderServiceImpl implements OrderService{
 
 	private final UserService userService;
 	private final ProductRepository productRepository;
-	private final OrderRepository orderRepository; 
+	private final OrderRepository orderRepository;
+
 	
 	
 	@Override
@@ -56,17 +58,17 @@ public class OrderServiceImpl implements OrderService{
 				.map(itemDTO -> {
 					Product product =  productRepository.findById(itemDTO.getProductId()).orElseThrow(
 							()-> new EntityNotFoundException ("product not found"));
-					return  OrderItem.builder()
+					
+//					return orderItemRepository.save(orderItem); 
+					
+					return OrderItem.builder()
 							.product(product)
 							.quantity(itemDTO.getQuantity())
 							.price(product.getSellingPrice() * itemDTO.getQuantity())
 							.order(order)
 							.build();
-//					return orderItemRepository.save(orderItem); 
-					
-//					return orderItem;
 			
-		}).toList();
+		}).collect(Collectors.toList());
 		double total = orderItems.stream().mapToDouble(
 				OrderItem::getPrice).sum();
 		order.setTotalAmount(total);
