@@ -39,7 +39,6 @@ public class Refund {
 	
 	@ManyToOne
 	@JsonIgnore
-	
 	private ShiftReport shiftReport;
 	
 	@ManyToOne
