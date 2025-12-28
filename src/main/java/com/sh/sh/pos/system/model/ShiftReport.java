@@ -40,7 +40,7 @@ public class ShiftReport {
 	
 	private Double netSale;
 	
-	private Double totalOrder;
+	private int totalOrder;
 	
 	@ManyToOne
 	private User cashier ;
