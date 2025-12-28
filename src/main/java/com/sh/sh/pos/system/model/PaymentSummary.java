@@ -8,7 +8,7 @@ import lombok.Data;
 
 public class PaymentSummary {
 
-	private PaymentType paymentType;
+	private PaymentType Type;
 	
 	private Double totalAmount;
 	
