@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Transient;
@@ -46,6 +47,7 @@ public class ShiftReport {
 	private User cashier ;
 	
 	@ManyToOne
+	@JoinColumn(name = "branch_id")
 	private Branch branch;
 	
 	@Transient
