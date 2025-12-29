@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sh.sh.pos.system.domain.PaymentType;
 import com.sh.sh.pos.system.mapper.ShiftReportMapper;
+import com.sh.sh.pos.system.model.Branch;
 import com.sh.sh.pos.system.model.Order;
 import com.sh.sh.pos.system.model.OrderItem;
 import com.sh.sh.pos.system.model.PaymentSummary;
@@ -57,9 +58,12 @@ public class ShiftReportServiceImpl implements ShiftReportService{
 			throw new Exception("Shift already started today"); 
 			
 		} 
+		
+		Branch branch = currentUser.getBranch();
 		ShiftReport shiftReport = ShiftReport.builder()
 				.cashier(currentUser)
 				.shiftStart(shiftStart)
+				.branch(branch)
 				.build(); 
 		
 		ShiftReport savedReport = shiftReportRepository.save(shiftReport);
@@ -80,6 +84,8 @@ public class ShiftReportServiceImpl implements ShiftReportService{
 				 shiftReport.getShiftEnd());
 		 
 		 double totalRefunds = refunds.stream().mapToDouble(refund -> refund.getAmount()!=null?refund.getAmount():0.0).sum(); 
+		 
+		 System.out.println("total Refund: " + totalRefunds);
 		 
 		 List<Order> orders = orderRepository.findByCashierAndCreatedAtBetween(currentUser, shiftReport.getShiftStart(), shiftReport.getShiftEnd());
 		 
@@ -143,8 +149,7 @@ public class ShiftReportServiceImpl implements ShiftReportService{
 		
 		List<Refund> refunds  = refundRepository.findByCashierIdAndCreatedAtBetween(
 				 user.getId(), 
-				 shiftReport.getShiftStart(),
-				 shiftReport.getShiftEnd());
+				 shiftReport.getShiftStart(),now);
 		 
 		 double totalRefunds = refunds.stream().mapToDouble(refund -> refund.getAmount()!=null?refund.getAmount():0.0).sum(); 
 		 
