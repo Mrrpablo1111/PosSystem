@@ -7,35 +7,33 @@ import com.sh.sh.pos.system.payload.dto.StoreDTO;
 
 public class StoreMapper {
 	public static StoreDTO toDTO(Store store) {
-		StoreDTO storeDTO = new StoreDTO();
-		
-		storeDTO.setId(store.getId());
-		storeDTO.setBrand(store.getBrand());
-		storeDTO.setStoreAdmin(UserMapper.toDTO(store.getStoreAdmin()));
-		storeDTO.setStoreType(store.getStoreType());
-		storeDTO.setDescription(store.getDescription());
-		storeDTO.setContact(store.getContact());
-		storeDTO.setStoreType(store.getStoreType());
-		storeDTO.setCreatedAt(store.getCreatedAt());
-		storeDTO.setUpdatedAt(store.getUpdatedAt());
-		storeDTO.setStatus(store.getStatus());
-		return storeDTO;
+		return StoreDTO.builder()
+                    .id(store.getId())
+                    .brand(store.getBrand())
+                    .storeAdminId(store.getStoreAdmin() != null ? store.getStoreAdmin().getId() : null)
+                    .storeAdmin(UserMapper.toDTO(store.getStoreAdmin()))
+                    .storeType(store.getStoreType())
+                    .description(store.getDescription())
+                    .contact(store.getContact())
+                    .createdAt(store.getCreatedAt())
+                    .updatedAt(store.getUpdatedAt())
+                    .status(store.getStatus())
+                    .build();
 		
 	}
 	
 	public static Store toEntity(StoreDTO storeDTO, User storeAdmin) {
+        
 		
-		Store store = new Store();
-		store.setId(storeDTO.getId());
-		store.setBrand(storeDTO.getBrand());
-		store.setStoreAdmin(storeAdmin);
-		store.setDescription(storeDTO.getDescription());
-		store.setContact(storeDTO.getContact());
-		store.setStatus(storeDTO.getStatus());
-		store.setStoreType(storeDTO.getStoreType());
-		store.setCreatedAt(storeDTO.getCreatedAt());
-		store.setUpdatedAt(storeDTO.getUpdatedAt());
-		store.setStatus(storeDTO.getStatus());
-		return store;
+		    return Store.builder()
+                    .id(storeDTO.getId())
+                    .brand(storeDTO.getBrand())
+                    .storeAdmin(storeAdmin)
+                    .createdAt(storeDTO.getCreatedAt())
+                    .updatedAt(storeDTO.getUpdatedAt())
+                    .storeType(storeDTO.getStoreType())
+                    .contact(storeDTO.getContact())
+                    .description(storeDTO.getDescription())
+                    .build();
 	}
 }

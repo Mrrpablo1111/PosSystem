@@ -6,8 +6,8 @@ import com.sh.sh.pos.system.exceptions.UserException;
 import com.sh.sh.pos.system.payload.dto.CategoryDTO;
 
 public interface CategoryService {
-	CategoryDTO createCategory(CategoryDTO dto) throws UserException, Exception;  
+	CategoryDTO createCategory(CategoryDTO dto) throws UserException;  
 	List<CategoryDTO> getCategoriesByStore(Long storeId);
-	CategoryDTO updateCategory(Long id, CategoryDTO dto) throws Exception;
-	void deleteCategory(Long id) throws Exception;
+	CategoryDTO updateCategory(Long id, CategoryDTO dto) throws UserException;
+	void deleteCategory(Long id) throws UserException;
 }

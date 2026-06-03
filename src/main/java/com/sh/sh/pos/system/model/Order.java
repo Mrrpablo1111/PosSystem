@@ -3,6 +3,8 @@ package com.sh.sh.pos.system.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sh.sh.pos.system.domain.OrderStatus;
 import com.sh.sh.pos.system.domain.PaymentType;
 
 import jakarta.persistence.CascadeType;
@@ -30,7 +32,7 @@ import lombok.Setter;
 public class Order {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	private Double totalAmount;
@@ -38,9 +40,11 @@ public class Order {
 	private LocalDateTime createdAt;
 	
 	@ManyToOne
+	 @JsonIgnore
 	private Branch branch;
 	
 	@ManyToOne
+	@JsonIgnore
 	private User cashier;
 	
 	@ManyToOne
@@ -52,7 +56,7 @@ public class Order {
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	private List<OrderItem> items;
 	
-	
+	private OrderStatus status = OrderStatus.COMPLETED;
 	@PrePersist
 	protected void onCreate() {
 		createdAt = LocalDateTime.now();

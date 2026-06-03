@@ -1,7 +1,6 @@
 package com.sh.sh.pos.system.configuration;
 
-
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,27 +19,35 @@ import java.util.Arrays;
 
 import java.util.Collections;
 
-
 @Configuration
 public class SecurityConfig {
-	 
-	@Bean
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
+    @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.sessionManagement(
-                        management -> management
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(Authorize -> Authorize.requestMatchers("/api/**").authenticated()
+                management -> management
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(Authorize -> Authorize.requestMatchers(
+                        "/api/users/forgot-password",
+                        "/api/users/reset-password").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .requestMatchers("/api/super-admin/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtValidator(),
                         BasicAuthenticationFilter.class)
-                .csrf(AbstractHttpConfigurer::disable).cors(
-                        cors -> cors.configurationSource(corsConfigurationSource())).build();
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .exceptionHandling(
+                        exceptionHandler -> exceptionHandler
+                                .authenticationEntryPoint(customAuthenticationEntryPoint))
+                .build();
 
     }
 
-   @Bean
-    public PasswordEncoder passwordEncoder(){
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -50,8 +57,7 @@ public class SecurityConfig {
             public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                 CorsConfiguration cfg = new CorsConfiguration();
                 cfg.setAllowedOrigins(
-                        Arrays.asList("http://localhost:5173", "http://localhost:3000")
-                );
+                        Arrays.asList("http://localhost:5173", "http://localhost:3000"));
                 cfg.setAllowedMethods(Collections.singletonList("*"));
                 cfg.setAllowCredentials(true);
                 cfg.setAllowedHeaders(Collections.singletonList("*"));

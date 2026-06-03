@@ -2,6 +2,9 @@ package com.sh.sh.pos.system.service.serviceImpl;
 
 import com.sh.sh.pos.system.model.User;  
 import com.sh.sh.pos.system.repository.UserRepository;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +18,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserImpl implements UserDetailsService {
 
     @Autowired

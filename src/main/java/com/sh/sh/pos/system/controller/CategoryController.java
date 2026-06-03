@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sh.sh.pos.system.exceptions.UserException;
 import com.sh.sh.pos.system.payload.dto.CategoryDTO;
-import com.sh.sh.pos.system.payload.response.ApiResponse;
 import com.sh.sh.pos.system.service.CategoryService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,9 +27,10 @@ public class CategoryController {
 	private final CategoryService categoryService;
 	
 	@PostMapping
+	@PreAuthorize("hasAnyAuthority('ROLE_STORE_MANAGER','ROLE_STORE_ADMIN')")
 	public ResponseEntity<CategoryDTO> createCategory(
 			@RequestBody CategoryDTO categroyDTO
-			)throws Exception{
+			)throws UserException{
 		return ResponseEntity.ok(
 				categoryService.createCategory(categroyDTO));
 		
@@ -42,10 +44,11 @@ public class CategoryController {
 	}
 	
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAnyAuthority('ROLE_STORE_MANAGER','ROLE_STORE_ADMIN')")
 	public ResponseEntity<CategoryDTO> updateCategory(
 			@RequestBody CategoryDTO categoryDTO,
 			@PathVariable Long id
-			)throws Exception{
+			)throws UserException{
 		
 		return ResponseEntity.ok(
 				categoryService.updateCategory(id, categoryDTO));
@@ -53,15 +56,14 @@ public class CategoryController {
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApiResponse> deleteCategory(
-			@RequestBody CategoryDTO categoryDTO,
-			@PathVariable Long id
-			)throws Exception{
-		categoryService.updateCategory(id, categoryDTO);
-		ApiResponse apiResponse = new ApiResponse();
-		apiResponse.setMessage("category deleted successfully");
-		return ResponseEntity.ok(apiResponse);
-	}
+	@PreAuthorize("hasAnyAuthority('ROLE_STORE_MANAGER','ROLE_STORE_ADMIN')")
+	public ResponseEntity<Void> deleteCategory(
+		@PathVariable Long id) throws UserException{
+		categoryService.deleteCategory(id);
+		return ResponseEntity.noContent().build();
+		}
+		
+	
 	
 	
 	

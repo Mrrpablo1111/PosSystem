@@ -1,4 +1,4 @@
-  package com.sh.sh.pos.system.controller;
+package com.sh.sh.pos.system.controller;
 
 import java.util.List;
 
@@ -16,14 +16,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sh.sh.pos.system.domain.StoreStatus;
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.exceptions.UserException;
 import com.sh.sh.pos.system.mapper.StoreMapper;
+import com.sh.sh.pos.system.model.Store;
 import com.sh.sh.pos.system.model.User;
 import com.sh.sh.pos.system.payload.dto.StoreDTO;
+import com.sh.sh.pos.system.payload.dto.UserDTO;
 import com.sh.sh.pos.system.payload.response.ApiResponse;
 import com.sh.sh.pos.system.service.StoreService;
 import com.sh.sh.pos.system.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -33,57 +37,85 @@ public class StoreController {
 	private final StoreService storeService;
 	private final UserService userService;
 
+	// Create new Store
 	@PostMapping("/create")
-	public ResponseEntity<StoreDTO> createStore(@RequestBody StoreDTO storeDTO,
+	public ResponseEntity<StoreDTO> createStore(@Valid @RequestBody StoreDTO storeDTO,
 			@RequestHeader("Authorization") String jwt) throws UserException {
+
 		User user = userService.getUserFromJwtToken(jwt);
 
 		return ResponseEntity.ok(storeService.createStore(storeDTO, user));
 	}
 
+	// Get Store By ID
 	@GetMapping("/{id}")
-	public ResponseEntity<StoreDTO> getStoreById(@RequestHeader("Authorization") String jwt, @PathVariable Long id)
-			throws Exception {
+	public ResponseEntity<StoreDTO> getStoreById(@PathVariable Long id)
+			throws ResourceNotFoundException {
 		return ResponseEntity.ok(storeService.getStoreById(id));
 	}
 
-	@GetMapping()
-	public ResponseEntity<List<StoreDTO>> getAllStores(@RequestHeader("Authorization") String jwt) {
-		return ResponseEntity.ok(storeService.getAllStores());
-	}
-
+	//Get Store By admin user ID
 	@GetMapping("/admin")
-	public ResponseEntity<StoreDTO> getStoreByAdmin(@RequestHeader("Authorization") String jwt) throws UserException {
-		return ResponseEntity.ok(StoreMapper.toDTO(storeService.getStoreByAdmin()));
-
+	public ResponseEntity<StoreDTO> getStoreByAdmin() throws UserException {
+		Store store = storeService.getStoreByAdminId();
+		return ResponseEntity.ok(StoreMapper.toDTO(store));
 	}
 
+	// Get all stores(admin)
+	@GetMapping()
+	public ResponseEntity<List<StoreDTO>> getAllStores(@RequestParam(required = false) StoreStatus status) {
+		return ResponseEntity.ok(storeService.getAllStores(status));
+	}
+
+	/**
+	 * Approve or decline a store request
+	 * 
+	 * @param storeId the store ID
+	 * @param action  the action to perform (APPROVE or DECLINE)
+	 * @return updated StoreDTO
+	 * @throws ResourceNotFoundException
+	 */
+	@PutMapping("/{storeId}/moderate")
+	public StoreDTO moderateStore(@PathVariable Long storeId, @RequestParam StoreStatus status
+			) throws ResourceNotFoundException {
+		return storeService.moderateStore(storeId, status);
+	}
+
+	// Get Store By employee user ID
 	@GetMapping("/employee")
-	
-	public ResponseEntity<StoreDTO> getStoreByEmployee(@RequestHeader("Authorization") String jwt)
+	public ResponseEntity<StoreDTO> getStoreByEmployee()
 			throws UserException {
-		return ResponseEntity.ok(storeService.getStoreByEmployee());
+				StoreDTO store = storeService.getStoreByEmployee();
+		return ResponseEntity.ok(store);
 	}
 
+	//update store by id
 	@PutMapping("/{id}")
-	@PreAuthorize("hasAuthority('ROLE_STORE_ADMIN')")  
-	public ResponseEntity<StoreDTO> updateStore(@PathVariable Long id, @RequestHeader("Authorization") String jwt,
-			@RequestBody StoreDTO storeDTO) throws UserException {
+	public ResponseEntity<StoreDTO> updateStore(@PathVariable Long id,
+			@RequestBody StoreDTO storeDTO) throws ResourceNotFoundException, UserException {
 		return ResponseEntity.ok(storeService.updateStore(id, storeDTO));
 	}
 
-	@PutMapping("/{id}/moderate")
-	public ResponseEntity<StoreDTO> moderateStore(@PathVariable Long id, @RequestParam StoreStatus status,
-			@RequestHeader("Authorization") String jwt, @RequestBody StoreDTO storeDTO) throws Exception {
-		return ResponseEntity.ok(storeService.moderateStore(id, status));
+	//delete store
+	@DeleteMapping()
+	public ResponseEntity<ApiResponse> deletedStore() throws ResourceNotFoundException, UserException {
+		storeService.deletedStore();
+		return ResponseEntity.ok(new ApiResponse("store deleted successfully"));
 	}
 
-	@DeleteMapping  ("/{id}")
-	public ResponseEntity<ApiResponse> deletedStore(@PathVariable Long id) throws UserException {
-		storeService.deletedStore(id);
-		ApiResponse apiResponse = new ApiResponse();
-		apiResponse.setMessage("store deleted successfully");
-		return ResponseEntity.ok(apiResponse);
+	
+	@GetMapping("/{storeId}/employee/list")
+	@PreAuthorize("hasAnyAuthority('ROLE_STORE_MANAGER','ROLE_STORE_ADMIN')")
+	public ResponseEntity<List<UserDTO>> getStoreEmployeeList(@PathVariable Long storeId) throws UserException{
+		List<UserDTO> employees = storeService.getEmployeesByStore(storeId);
+		return ResponseEntity.ok(employees);
+	} 
+
+	@PostMapping("/add/employee")
+	@PreAuthorize("hasAnyAuthority('STORE_MANAGER','STORE_ADMIN')")
+	public ResponseEntity<UserDTO> addEmployeeToStore(@RequestBody UserDTO userDTO) throws UserException{
+		UserDTO addedEmployee = storeService.addEmployee(null, userDTO);
+		return ResponseEntity.ok(addedEmployee);
 	}
 
 }

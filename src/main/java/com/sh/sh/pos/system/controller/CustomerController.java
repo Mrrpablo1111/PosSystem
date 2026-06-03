@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.model.Customer;
-import com.sh.sh.pos.system.payload.response.ApiResponse;
 import com.sh.sh.pos.system.service.CustomerService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,18 +33,14 @@ public class CustomerController {
 	}
 	
 	@PutMapping("/{id}")
-	public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) throws Exception{
+	public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) throws ResourceNotFoundException{
 		return ResponseEntity.ok(customerService.updateCustomer(id, customer));
 	}
 	
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApiResponse> deleteCustomer(@PathVariable Long id) throws Exception{
-		customerService.deleteCustomer(id);
-		
-		ApiResponse apiResponse = new ApiResponse();
-		apiResponse.setMessage("Customer deleted");
-		
-		return ResponseEntity.ok(apiResponse);
+	public ResponseEntity<String> deleteCustomer(@PathVariable Long id) throws ResourceNotFoundException{
+		customerService.deleteCustomer(id);		
+		return ResponseEntity.ok("Customer deleted successfully");
 	}
 	
 	@GetMapping()

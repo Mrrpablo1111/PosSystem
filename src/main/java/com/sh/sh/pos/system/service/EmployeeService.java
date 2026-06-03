@@ -8,12 +8,10 @@ import com.sh.sh.pos.system.payload.dto.UserDTO;
 
 public interface EmployeeService {
 	UserDTO createStoreEmployee(UserDTO employee, Long storeId) throws Exception; 
-	UserDTO createBranchEmployee(UserDTO employee, Long branchId) throws Exception;
-	
-	User updateEmployee(Long employeeId, UserDTO employeeDetails) throws Exception;
-	
+	User createBranchEmployee(User employee, Long branchId) throws Exception;
+	User updateEmployee(Long employeeId, User employeeDetails) throws Exception;
 	void deleteEmployee(Long employeeId) throws Exception;
-	
-	List<UserDTO> findByStoreEmployees(Long storeId, UserRole role) throws Exception;
-	List<UserDTO> findByBranchEmployees(Long branchId, UserRole role) throws Exception; 
+	User findEmployeeById(Long employeeId) throws Exception;
+	List<User> findByStoreEmployees(Long storeId, UserRole role) throws Exception;
+	List<User> findByBranchEmployees(Long branchId, UserRole role) throws Exception; 
 }

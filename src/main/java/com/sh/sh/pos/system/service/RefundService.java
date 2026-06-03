@@ -3,24 +3,27 @@ package com.sh.sh.pos.system.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
+import com.sh.sh.pos.system.exceptions.UserException;
+import com.sh.sh.pos.system.model.Refund;
 import com.sh.sh.pos.system.payload.dto.RefundDTO;
 
 public interface RefundService {
 	
-	RefundDTO createRefund(RefundDTO refund) throws Exception;
+	Refund createRefund(RefundDTO refund) throws UserException, ResourceNotFoundException;
 	
-	List<RefundDTO> getAllRefunds() throws Exception;
+	List<Refund> getAllRefunds();
 	
-	List<RefundDTO> getRefundByCashier(Long cashierId) throws Exception;
-    List<RefundDTO> getRefundByShiftReport(Long shiftReportId) throws Exception;
+	List<Refund> getRefundByCashier(Long cashierId);
+    List<Refund> getRefundByShiftReport(Long shiftReportId);
 	
-	List<RefundDTO> getRefundByCashierAndDateRang(Long cashierId, LocalDateTime startDate, LocalDateTime endDate) throws Exception;
+	List<Refund> getRefundByCashierAndDateRang(Long cashierId, LocalDateTime startDate, LocalDateTime endDate) ;
 	
-	List<RefundDTO> getRefundByBranch(Long branchId) throws Exception;
+	List<Refund> getRefundByBranch(Long branchId);
 	
-	RefundDTO getRefundById(Long refundId) throws Exception;
+	Refund getRefundById(Long refundId) throws ResourceNotFoundException;
 	
-	void deleteRefund(Long refundId) throws Exception;
+	void deleteRefund(Long refundId) throws ResourceNotFoundException;
 	
 	
 

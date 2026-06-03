@@ -1,8 +1,10 @@
 package com.sh.sh.pos.system.payload.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data 
+@AllArgsConstructor
 public class ApiResponse {
-	String message;
+	private String message;
 }

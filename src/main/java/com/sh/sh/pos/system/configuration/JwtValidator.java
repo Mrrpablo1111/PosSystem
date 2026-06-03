@@ -1,6 +1,5 @@
 package com.sh.sh.pos.system.configuration;
 
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -23,13 +22,14 @@ import java.util.List;
 public class JwtValidator extends OncePerRequestFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String jwt = request.getHeader(JwtConstant.JWT_HEADER);
 
         // Bearer jwt
-           if(jwt != null){
+        if (jwt != null && jwt.startsWith("Bearer ")) {
             jwt = jwt.substring(7);
-            try{
+            try {
                 SecretKey key = Keys.hmacShaKeyFor(JwtConstant.JWT_SECRET.getBytes());
                 Claims claims = Jwts.parser()
                         .verifyWith(key)
@@ -37,17 +37,20 @@ public class JwtValidator extends OncePerRequestFilter {
                         .parseSignedClaims(jwt)
                         .getPayload();
 
-                String email = String.valueOf(claims.get("email"));
+                String email = claims.getSubject();
+                System.out.println("JWT Subject = " + email);
                 String authorities = String.valueOf(claims.get("authorities"));
+                System.out.println("Authorities = " + authorities);
 
                 List<GrantedAuthority> auths = AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
-                Authentication auth = new UsernamePasswordAuthenticationToken(email,null, auths);
+                Authentication auth = new UsernamePasswordAuthenticationToken(email, null, auths);
                 SecurityContextHolder.getContext().setAuthentication(auth);
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new BadCredentialsException("Invalid JWT");
             }
-            
+
+
         }
-           filterChain.doFilter(request, response);
+        filterChain.doFilter(request, response);
     }
 }

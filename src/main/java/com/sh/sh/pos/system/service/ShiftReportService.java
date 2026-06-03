@@ -3,26 +3,30 @@ package com.sh.sh.pos.system.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.ShiftReportDTO;
+import com.sh.sh.pos.system.exceptions.UserException;
+import com.sh.sh.pos.system.model.ShiftReport;
 
 public interface ShiftReportService {
 	
-	ShiftReportDTO startShift() throws Exception;
+	ShiftReport startShift(Long cashierId, Long branchId, LocalDateTime shiftStart) throws UserException;
 	
-	ShiftReportDTO endShift(Long shiftReportId, LocalDateTime shiftEnd) throws Exception;
+	ShiftReport endShift(Long shiftReportId, LocalDateTime shiftEnd) throws UserException;
 	
-	ShiftReportDTO getShiftReportById(Long id) throws Exception;
+	ShiftReport getShiftReportById(Long id) ;
+
 	
-	List<ShiftReportDTO> getAllShiftReports();
+	List<ShiftReport> getAllShiftReports();
 	
-	List<ShiftReportDTO> getShiftReportByBranchId(Long branchId);
+	List<ShiftReport> getShiftReportByBranchId(Long branchId);
 	
-	List<ShiftReportDTO> getShiftReportByCashierId(Long cashierId);
+	List<ShiftReport> getShiftReportByCashierId(Long cashierId);
 	
-	ShiftReportDTO getCurrentShiftProgress(Long cashierId) throws Exception;
+	ShiftReport getCurrentShiftProgress(Long cashierId) throws UserException;
+
 	
-	ShiftReportDTO getShiftByCashierAndDate(Long cashierId, LocalDateTime date) throws Exception;
+	
+	ShiftReport getShiftByCashierAndDate(Long cashierId, LocalDateTime date);
 	 
-	
+	void deleteShiftReport(Long id);
 
 }

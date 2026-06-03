@@ -9,14 +9,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sh.sh.pos.system.exceptions.UserException;
+import com.sh.sh.pos.system.model.User;
 import com.sh.sh.pos.system.payload.dto.BranchDTO;
-import com.sh.sh.pos.system.payload.response.ApiResponse;
 import com.sh.sh.pos.system.service.BranchService;
+import com.sh.sh.pos.system.service.UserService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,46 +28,54 @@ import lombok.RequiredArgsConstructor;
 public class BranchController {
 	
 	private final BranchService branchService;
+	private final UserService userService;
 	
+	// Create a new branch
 	@PostMapping
-	public ResponseEntity<BranchDTO> createBranch(@RequestBody BranchDTO branchDTO) throws UserException{
+	public ResponseEntity<BranchDTO> createBranch(@RequestBody @Valid @RequestHeader("Authorization") String jwt, BranchDTO branchDTO) throws UserException{
 		
-		BranchDTO createdBranch = branchService.createBranch(branchDTO);
-		return ResponseEntity.ok(createdBranch);
+		User user = userService.getUserFromJwtToken(jwt);
+		
+		return ResponseEntity.ok(branchService.createBranch(branchDTO, user));
 	}
 	
+	// Get a branch by ID
 	@GetMapping("/{id}")
 	public ResponseEntity<BranchDTO> getBranchById(@PathVariable Long id) throws Exception{
+	
 		
-		BranchDTO createdBranch = branchService.getBranchById(id);
-		
-		return ResponseEntity.ok(createdBranch);
+		return ResponseEntity.ok(branchService.getBranchById(id));
 	}
 	
+	// Get all branches by store ID
 	@GetMapping("/store/{storeId}")
-	public ResponseEntity<List<BranchDTO>> getAllBranchByStoreId(@PathVariable Long storeId) throws Exception{
+	public ResponseEntity<List<BranchDTO>> getAllBranchByStoreId(@RequestHeader("Authorization") String jwt, @PathVariable Long storeId) throws Exception{
 		
-		List<BranchDTO> createdBranch = branchService.getAllBranchesByStoreId(storeId);
 		
-		return ResponseEntity.ok(createdBranch);
+		
+		return ResponseEntity.ok(branchService.getAllBranchesByStoreId(storeId));
 	}
 	
+	// Update a branch
 	@PutMapping("/{id}")
-	public ResponseEntity<BranchDTO> updateBranch(@PathVariable Long id, @RequestBody BranchDTO branchDTO) throws Exception{
+	public ResponseEntity<BranchDTO> updateBranch(
+		@PathVariable Long id, 
+		@RequestBody BranchDTO branchDTO, 
+		@RequestHeader("Authorization") String jwt) throws Exception{
 		
-		BranchDTO updatedBranch = branchService.updateBranch(id, branchDTO);
-		
-		return ResponseEntity.ok(updatedBranch);
+		User user = userService.getUserFromJwtToken(jwt);
+	
+		return ResponseEntity.ok(branchService.updateBranch(id, branchDTO, user));
 	}
 	
+	// Delete a branch
 	@DeleteMapping("/{id}")
-	public ResponseEntity<ApiResponse> deleteBranchById(@PathVariable Long id) throws Exception{
+	public ResponseEntity<Void> deleteBranchById(@PathVariable Long id) throws Exception{
 		
 		branchService.deleteBranch(id);
-		ApiResponse apiResponse = new ApiResponse();
-		apiResponse.setMessage("branch deleted successfully");
 		
-		return ResponseEntity.ok(apiResponse) ;
+		
+		return ResponseEntity.noContent().build(); 
 	}
 	
 	

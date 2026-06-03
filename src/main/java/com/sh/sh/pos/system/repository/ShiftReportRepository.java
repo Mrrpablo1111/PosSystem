@@ -6,14 +6,15 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.sh.sh.pos.system.model.Branch;
 import com.sh.sh.pos.system.model.ShiftReport;
 import com.sh.sh.pos.system.model.User;
 
 public interface ShiftReportRepository extends JpaRepository<ShiftReport, Long> {
 	
-	List<ShiftReport> findByCashierId(Long id);
+	List<ShiftReport> findByCashier(User cashier);
 	
-	List<ShiftReport> findByBranchId(Long id);
+	List<ShiftReport> findByBranch(Branch branch);
 	
 	Optional<ShiftReport> findTopByCashierAndShiftEndIsNullOrderByShiftStartDesc(User cashier);
 	

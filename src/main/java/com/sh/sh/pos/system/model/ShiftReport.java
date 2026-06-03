@@ -29,7 +29,7 @@ import lombok.Setter;
 public class ShiftReport {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	
@@ -47,7 +47,6 @@ public class ShiftReport {
 	private User cashier ;
 	
 	@ManyToOne
-	@JoinColumn(name = "branch_id")
 	private Branch branch;
 	
 	@Transient

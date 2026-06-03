@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.model.Customer;
 import com.sh.sh.pos.system.repository.CustomerRepository;
 import com.sh.sh.pos.system.service.CustomerService;
@@ -22,29 +23,31 @@ public class CustomerServiceImpl implements CustomerService{
 	}
 
 	@Override
-	public Customer updateCustomer(Long id, Customer customer) throws Exception {
+	public Customer updateCustomer(Long id, Customer customer) throws ResourceNotFoundException {
 		Customer customerToUpdate = customerRepository.findById(id).orElseThrow(
-				() -> new Exception("Customer not found")); 
+				() -> new ResourceNotFoundException("Customer not found")); 
 		
 		customerToUpdate.setEmail(customer.getEmail());
 		customerToUpdate.setFullName(customer.getFullName());
 		customerToUpdate.setPhone(customer.getPhone());
 		
-		return customerRepository.save(customer);
+		return customerRepository.save(customerToUpdate);
  	}
 
 	@Override
-	public void deleteCustomer(Long id) throws Exception {
+	public void deleteCustomer(Long id) throws ResourceNotFoundException {
 		Customer customerToUpdate = customerRepository.findById(id).orElseThrow(
-				() -> new Exception("Customer not found")); 
+				() -> new ResourceNotFoundException("Customer not found"+id)); 
 		
 		customerRepository.delete(customerToUpdate);
 	}
 	
 	@Override
-	public Customer getCustomer(Long id) throws Exception {
+	public Customer getCustomerById(Long id) throws ResourceNotFoundException{
+
+		return customerRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException("customer not found with id" + id));
 		
-		return customerRepository.findById(id).orElseThrow(()-> new Exception("Customer not found"));
+		
 	}
 
 	@Override

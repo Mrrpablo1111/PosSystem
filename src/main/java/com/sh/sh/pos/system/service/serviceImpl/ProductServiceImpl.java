@@ -1,11 +1,13 @@
- package com.sh.sh.pos.system.service.serviceImpl;
+package com.sh.sh.pos.system.service.serviceImpl;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.sh.sh.pos.system.domain.UserRole;
 import com.sh.sh.pos.system.mapper.ProductMapper;
 import com.sh.sh.pos.system.model.Category;
 import com.sh.sh.pos.system.model.Product;
@@ -17,38 +19,37 @@ import com.sh.sh.pos.system.repository.ProductRepository;
 import com.sh.sh.pos.system.repository.StoreRepository;
 import com.sh.sh.pos.system.service.ProductService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor 
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-	
+
 	private final ProductRepository productRepository;
 
 	private final StoreRepository storeRepository;
-	
+
 	private final CategoryRepository categoryRepository;
-	@Override
-	public ProductDTO createProduct(ProductDTO productDTO, User user) throws Exception {
-		Store store = storeRepository.findById(productDTO.getStoreId()).orElseThrow(
-				() -> new Exception("Store not found ")
-				);
-		
-			Category category = categoryRepository.findById(productDTO.getCategoryId()).orElseThrow(
-					() -> new Exception("Category not found")
-					);
-			Product product = ProductMapper.toEntity(productDTO, store, category);
-			Product savedProduct = productRepository.save(product);
-		return ProductMapper.toDTO(savedProduct);
-	} 
 
 	@Override
-	public ProductDTO updateProduct(Long id, ProductDTO productDTO, User user) throws Exception {
+	public ProductDTO createProduct(ProductDTO productDTO, User user) throws AccessDeniedException {
+		Store store = storeRepository.findById(productDTO.getStoreId()).orElseThrow(
+				() -> new EntityNotFoundException("Store not found "));
+
+		Category category = categoryRepository.findById(productDTO.getCategoryId()).orElseThrow(
+				() -> new EntityNotFoundException("Category not found"));
+		Product product = ProductMapper.toEntity(productDTO, store, category);
+		Product savedProduct = productRepository.save(product);
+		return ProductMapper.toDTO(savedProduct);
+	}
+
+	@Override
+	public ProductDTO updateProduct(Long id, ProductDTO productDTO, User user) throws AccessDeniedException {
 		Product product = productRepository.findById(id).orElseThrow(
-				() -> new Exception("product not found")
-				);
-			
-		
+				() -> new EntityNotFoundException("product not found"));
+		checkAuthority(product.getStore(), user);
+
 		product.setName(productDTO.getName());
 		product.setDescription(productDTO.getDescription());
 		product.setSku(productDTO.getSku());
@@ -57,39 +58,62 @@ public class ProductServiceImpl implements ProductService {
 		product.setSellingPrice(productDTO.getSellingPrice());
 		product.setBrand(productDTO.getBrand());
 		product.setUpdatedAt(LocalDateTime.now());
-		if(productDTO.getCategoryId()!=null) {
+		if (productDTO.getCategoryId() != null) {
 			Category category = categoryRepository.findById(productDTO.getCategoryId()).orElseThrow(
-					() -> new Exception("category not found"));
+					() -> new EntityNotFoundException("category not found"));
 			product.setCategory(category);
 		}
-		Product savedProduct = productRepository.save(product);
-		
-				
-		return ProductMapper.toDTO(savedProduct);
+		return ProductMapper.toDTO(productRepository.save(product));
 	}
 
 	@Override
-	public void deleteProduct(Long id, User user) throws Exception {
+	public void deleteProduct(Long id, User user) throws AccessDeniedException {
 		Product product = productRepository.findById(id).orElseThrow(
-				() -> new Exception("product not found")
-				);
-		productRepository.delete(product);
-		
+				() -> new EntityNotFoundException("product not found"));
+			
+		checkAuthority(product.getStore(), user);	
+		productRepository.deleteById(id);
+
 	}
 
 	@Override
 	public List<ProductDTO> getProductByStoreId(Long storeId) {
-		List<Product> products = productRepository.findByStoreId(storeId);
-		
-		return products.stream().map(ProductMapper::toDTO).collect(Collectors.toList());
+
+
+		return productRepository.findByStoreId(storeId)
+				.stream()
+				.map(ProductMapper::toDTO)
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<ProductDTO> searchBykeyword(Long storeId, String keyword) {
-		List<Product> products = productRepository.searchByKeyword(storeId, keyword);
-		
-		return products.stream()
-				.map(ProductMapper::toDTO).collect(Collectors.toList());
+		return productRepository.searchByKeyword(storeId, keyword)
+				.stream()
+				.map(ProductMapper::toDTO)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public ProductDTO getProductById(Long id) {
+		Product product = productRepository.findById(id).orElseThrow(()->new EntityNotFoundException("Product not found"));
+		return ProductMapper.toDTO(product);
+	}
+
+	public void checkAuthority(Store store, User user) throws AccessDeniedException {
+
+		if (user.getRole() == UserRole.ROLE_STORE_MANAGER
+				&& user.getStore().getId().equals(store.getId())) {
+			return;
+		}
+
+		if (user.getRole() == UserRole.ROLE_STORE_ADMIN
+				&& store.getStoreAdmin().getId().equals(user.getId())) {
+			return;
+		}
+
+		throw new AccessDeniedException("You are not authorized to manage this store.");
+
 	}
 
 }
