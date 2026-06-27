@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.model.Customer;
+import com.sh.sh.pos.system.payload.dto.CustomerDTO;
 import com.sh.sh.pos.system.service.CustomerService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,32 +26,38 @@ import lombok.RequiredArgsConstructor;
 public class CustomerController {
 	
 	private final CustomerService customerService;
-	
-	@PostMapping()
-	public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer){
-		
-		return ResponseEntity.ok(customerService.createCustomer(customer));
-	}
-	
-	@PutMapping("/{id}")
-	public ResponseEntity<Customer> updateCustomer(@PathVariable Long id, @RequestBody Customer customer) throws ResourceNotFoundException{
-		return ResponseEntity.ok(customerService.updateCustomer(id, customer));
-	}
-	
-	@DeleteMapping("/{id}")
-	public ResponseEntity<String> deleteCustomer(@PathVariable Long id) throws ResourceNotFoundException{
-		customerService.deleteCustomer(id);		
-		return ResponseEntity.ok("Customer deleted successfully");
-	}
-	
-	@GetMapping()
-	public ResponseEntity<List<Customer>> getAll(){
-		return ResponseEntity.ok(customerService.getAllCustomers());
-	}
-	
-	@GetMapping("/search")
-	public ResponseEntity<List<Customer>> search(@RequestParam String q){
-		return ResponseEntity.ok(customerService.searchCustomers(q));
-	}
+
+    @PostMapping
+    public ResponseEntity<CustomerDTO> createCustomer(@RequestBody CustomerDTO dto) {
+        return ResponseEntity.ok(customerService.createCustomer(dto));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CustomerDTO> updateCustomer(
+            @PathVariable Long id,
+            @RequestBody CustomerDTO dto) throws ResourceNotFoundException {
+        return ResponseEntity.ok(customerService.updateCustomer(id, dto));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CustomerDTO> getById(@PathVariable Long id) throws ResourceNotFoundException {
+        return ResponseEntity.ok(customerService.getCustomerById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteCustomer(@PathVariable Long id) throws ResourceNotFoundException {
+        customerService.deleteCustomer(id);
+        return ResponseEntity.ok("Customer deleted successfully");
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CustomerDTO>> getAll() {
+        return ResponseEntity.ok(customerService.getAllCustomers());
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerDTO>> search(@RequestParam String q) {
+        return ResponseEntity.ok(customerService.searchCustomers(q));
+    }
 
 }

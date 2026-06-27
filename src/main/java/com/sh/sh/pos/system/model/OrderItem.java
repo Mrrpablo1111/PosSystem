@@ -1,5 +1,9 @@
 package com.sh.sh.pos.system.model;
 
+import java.math.BigDecimal;
+
+import com.sh.sh.pos.system.model.products.Product;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,7 +31,7 @@ public class OrderItem {
 	
 	private Integer quantity;
 	
-	private Double price;
+	private BigDecimal price;
 	
 	@ManyToOne
 	private Product product;

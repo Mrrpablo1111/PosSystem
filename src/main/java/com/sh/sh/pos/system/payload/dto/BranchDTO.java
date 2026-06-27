@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import com.sh.sh.pos.system.domain.BranchType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +20,7 @@ public class BranchDTO {
 
 	private Long id;
 	private String name;
+	private BranchType branchType;
 	private String address;
 	private String phone;
 	private String email;

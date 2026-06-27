@@ -1,15 +1,18 @@
 package com.sh.sh.pos.system.service.serviceImpl;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.hibernate.proxy.EntityNotFoundDelegate;
+
 import org.springframework.stereotype.Service;
 
 import com.sh.sh.pos.system.domain.PaymentType;
@@ -19,10 +22,10 @@ import com.sh.sh.pos.system.model.Branch;
 import com.sh.sh.pos.system.model.Order;
 import com.sh.sh.pos.system.model.OrderItem;
 import com.sh.sh.pos.system.model.PaymentSummary;
-import com.sh.sh.pos.system.model.Product;
 import com.sh.sh.pos.system.model.Refund;
 import com.sh.sh.pos.system.model.ShiftReport;
 import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.payload.dto.ShiftReportDTO;
 import com.sh.sh.pos.system.repository.BranchRepository;
 import com.sh.sh.pos.system.repository.OrderRepository;
@@ -86,18 +89,23 @@ public class ShiftReportServiceImpl implements ShiftReportService {
 		shiftReport.setShiftEnd(shiftEnd);
 		List<Refund> refunds = refundRepository.findByCashierAndCreatedAtBetween(
 				shiftReport.getCashier(), shiftReport.getShiftStart(), shiftEnd);
-		double totalRefunds = refunds.stream()
-				.mapToDouble(refund -> refund.getAmount() != null ? refund.getAmount() : 0.0).sum();
+		BigDecimal totalRefunds = refunds.stream()
+				.map(Refund::getAmount)
+				.filter(Objects::nonNull)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 		System.out.println("total Refund: " + totalRefunds);
 
 		List<Order> orders = orderRepository.findByCashierAndCreatedAtBetween(
 				shiftReport.getCashier(), shiftReport.getShiftStart(), shiftEnd);
-		double totalSales = orders.stream().mapToDouble(Order::getTotalAmount).sum();
+		BigDecimal totalSales = orders.stream()
+				.map(Order::getTotalAmount)
+				.filter(Objects::nonNull)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 		int totalOrders = orders.size();
 
-		double netSales = totalSales - totalRefunds;
+		BigDecimal netSales = totalSales.subtract(totalRefunds);
 
 		shiftReport.setTotalOrder(totalOrders);
 		shiftReport.setTotalRefunds(totalRefunds);
@@ -112,9 +120,9 @@ public class ShiftReportServiceImpl implements ShiftReportService {
 	}
 
 	@Override
-	public ShiftReport getShiftReportById(Long id){
+	public ShiftReport getShiftReportById(Long id) {
 
-		return shiftReportRepository.findById(id).orElseThrow(()-> new RuntimeException("Shift report not found"));
+		return shiftReportRepository.findById(id).orElseThrow(() -> new RuntimeException("Shift report not found"));
 	}
 
 	@Override
@@ -125,15 +133,15 @@ public class ShiftReportServiceImpl implements ShiftReportService {
 	@Override
 	public List<ShiftReport> getShiftReportByBranchId(Long branchId) {
 		Branch branch = branchRepository.findById(branchId)
-			.orElseThrow(()-> new RuntimeException("Branch not found"));
+				.orElseThrow(() -> new RuntimeException("Branch not found"));
 		return shiftReportRepository.findByBranch(branch);
-		
+
 	}
 
 	@Override
 	public List<ShiftReport> getShiftReportByCashierId(Long cashierId) {
 		User cashier = userRepository.findById(cashierId)
-		.orElseThrow(()-> new RuntimeException("Cashier not found"));
+				.orElseThrow(() -> new RuntimeException("Cashier not found"));
 		return shiftReportRepository.findByCashier(cashier);
 	}
 
@@ -146,20 +154,25 @@ public class ShiftReportServiceImpl implements ShiftReportService {
 
 		LocalDateTime now = LocalDateTime.now();
 
-		List<Order> orders = orderRepository.findByCashierAndCreatedAtBetween(cashier, shiftReport.getShiftStart(), now);
+		List<Order> orders = orderRepository.findByCashierAndCreatedAtBetween(cashier, shiftReport.getShiftStart(),
+				now);
 
 		List<Refund> refunds = refundRepository.findByCashierAndCreatedAtBetween(
-                cashier, shiftReport.getShiftStart(), now
-        );
+				cashier, shiftReport.getShiftStart(), now);
 
-		double totalRefunds = refunds.stream()
-				.mapToDouble(refund -> refund.getAmount() != null ? refund.getAmount() : 0.0).sum();
+		BigDecimal totalRefunds = refunds.stream()
+				.map(Refund::getAmount)
+				.filter(Objects::nonNull)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 
-		double totalSales = orders.stream().mapToDouble(Order::getTotalAmount).sum();
+		BigDecimal totalSales = orders.stream()
+				.map(Order::getTotalAmount)
+				.filter(Objects::nonNull)
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 		int totalOrders = orders.size();
 
-		double netSales = totalSales - totalRefunds;
+		BigDecimal netSales = totalSales.subtract(totalRefunds);
 
 		shiftReport.setTotalOrder(totalOrders);
 		shiftReport.setTotalRefunds(totalRefunds);
@@ -183,12 +196,12 @@ public class ShiftReportServiceImpl implements ShiftReportService {
 		LocalDateTime end = date.withHour(23).withMinute(59).withSecond(59);
 
 		return shiftReportRepository.findByCashierAndShiftStartBetween(cashier, start, end)
-		.orElseThrow(()-> new RuntimeException("No shift report found on this date"));
+				.orElseThrow(() -> new RuntimeException("No shift report found on this date"));
 	}
 
 	// ------------------Helper Method s---------------------
 
-	private List<PaymentSummary> getPaymentSummaries(List<Order> orders, double totalSales) {
+	private List<PaymentSummary> getPaymentSummaries(List<Order> orders, BigDecimal totalSales) {
 
 		Map<PaymentType, List<Order>> grouped = orders.stream()
 				.collect(Collectors.groupingBy(
@@ -197,11 +210,20 @@ public class ShiftReportServiceImpl implements ShiftReportService {
 		List<PaymentSummary> summaries = new ArrayList<>();
 
 		for (Map.Entry<PaymentType, List<Order>> entry : grouped.entrySet()) {
-			double amount = entry.getValue().stream().mapToDouble(Order::getTotalAmount).sum();
+			BigDecimal amount = entry.getValue()
+					.stream()
+					.map(Order::getTotalAmount)
+					.filter(Objects::nonNull)
+					.reduce(BigDecimal.ZERO, BigDecimal::add);
 
 			int tansactions = entry.getValue().size();
-			double percent = (amount / totalSales) * 100;
+			BigDecimal percent = BigDecimal.ZERO;
 
+			if (totalSales.compareTo(BigDecimal.ZERO) > 0) {
+				percent = amount
+						.multiply(BigDecimal.valueOf(100))
+						.divide(totalSales, 2, RoundingMode.HALF_UP);
+			}
 			PaymentSummary ps = new PaymentSummary();
 			ps.setType(entry.getKey());
 			ps.setTotalAmount(amount);
@@ -240,10 +262,10 @@ public class ShiftReportServiceImpl implements ShiftReportService {
 
 	@Override
 	public void deleteShiftReport(Long id) {
-		 if (!shiftReportRepository.existsById(id)) {
-            throw new RuntimeException("Shift report not found");
-        }
-        shiftReportRepository.deleteById(id);
+		if (!shiftReportRepository.existsById(id)) {
+			throw new RuntimeException("Shift report not found");
+		}
+		shiftReportRepository.deleteById(id);
 	}
 
 }

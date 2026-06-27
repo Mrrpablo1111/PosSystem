@@ -32,7 +32,8 @@ public class BranchController {
 	
 	// Create a new branch
 	@PostMapping
-	public ResponseEntity<BranchDTO> createBranch(@RequestBody @Valid @RequestHeader("Authorization") String jwt, BranchDTO branchDTO) throws UserException{
+	public ResponseEntity<BranchDTO> createBranch(@RequestBody @Valid BranchDTO branchDTO,
+            @RequestHeader("Authorization") String jwt) throws UserException{
 		
 		User user = userService.getUserFromJwtToken(jwt);
 		

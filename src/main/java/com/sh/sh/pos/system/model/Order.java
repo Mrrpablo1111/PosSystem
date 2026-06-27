@@ -1,5 +1,6 @@
 package com.sh.sh.pos.system.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,9 +36,16 @@ public class Order {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	private Double totalAmount;
+	private BigDecimal totalAmount;
 	
 	private LocalDateTime createdAt;
+
+	private BigDecimal taxAmount;
+
+	private BigDecimal grandTotal;
+	private String receiptNumber;
+
+	private BigDecimal discountAmount;
 	
 	@ManyToOne
 	 @JsonIgnore

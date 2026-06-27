@@ -1,18 +1,19 @@
 package com.sh.sh.pos.system.mapper;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
 import com.sh.sh.pos.system.model.Order;
-import com.sh.sh.pos.system.model.Product;
 import com.sh.sh.pos.system.model.Refund;
 import com.sh.sh.pos.system.model.ShiftReport;
+import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.payload.dto.OrderDTO;
-import com.sh.sh.pos.system.payload.dto.ProductDTO;
 import com.sh.sh.pos.system.payload.dto.RefundDTO;
 import com.sh.sh.pos.system.payload.dto.ShiftReportDTO;
+import com.sh.sh.pos.system.payload.dto.productDTO.ProductDTO;
 
 @Component
 public class ShiftReportMapper {
@@ -23,10 +24,10 @@ public class ShiftReportMapper {
 				dto.setId(shiftReport.getId());
 				dto.setShiftEnd(shiftReport.getShiftEnd());
 				dto.setShiftStart(shiftReport.getShiftStart());
-				dto.setTotalSales(shiftReport.getTotalSales() != null ? shiftReport.getTotalSales() : 0.0);
+				dto.setTotalSales(shiftReport.getTotalSales() != null ? shiftReport.getTotalSales() : BigDecimal.ZERO);
 				dto.setTotalOrder(shiftReport.getTotalOrder());
-				dto.setTotalRefunds(shiftReport.getTotalRefunds() != null ? shiftReport.getTotalRefunds(): 0.0);
-				dto.setNetSale(shiftReport.getNetSale() != null ? shiftReport.getNetSale() : 0.0);
+				dto.setTotalRefunds(shiftReport.getTotalRefunds() != null ? shiftReport.getTotalRefunds(): BigDecimal.ZERO);
+				dto.setNetSale(shiftReport.getNetSale() != null ? shiftReport.getNetSale() : BigDecimal.ZERO);
 				dto.setTotalOrder(shiftReport.getTotalOrder());
 				dto.setCashier(UserMapper.toDTO(shiftReport.getCashier()));
 				dto.setCashierId(shiftReport.getCashier() != null ? shiftReport.getCashier().getId() : null);

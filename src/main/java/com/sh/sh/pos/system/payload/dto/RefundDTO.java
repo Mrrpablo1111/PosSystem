@@ -1,5 +1,6 @@
 package com.sh.sh.pos.system.payload.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 
@@ -16,7 +17,7 @@ public class RefundDTO {
 	private Long id;
 	private Long orderId;
 	private String reason;
-	private Double amount;
+	private BigDecimal amount;
 	private Long shiftReportId;
 	private String cashierName;
 	private Long branchId;  

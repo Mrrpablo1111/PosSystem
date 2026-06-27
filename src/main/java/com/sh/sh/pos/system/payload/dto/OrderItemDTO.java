@@ -1,6 +1,10 @@
 package com.sh.sh.pos.system.payload.dto;
 
 
+import java.math.BigDecimal;
+
+import com.sh.sh.pos.system.payload.dto.productDTO.ProductDTO;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +15,7 @@ public class OrderItemDTO {
 	
 	private Integer quantity;
 	
-	private Double price;
+	private BigDecimal price;
 	
 	
 	private ProductDTO product;

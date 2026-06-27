@@ -1,6 +1,8 @@
 package com.sh.sh.pos.system.service.serviceImpl;
 
 import com.sh.sh.pos.system.repository.BranchRepository;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,8 +17,8 @@ import com.sh.sh.pos.system.mapper.OrderMapper;
 import com.sh.sh.pos.system.model.Branch;
 import com.sh.sh.pos.system.model.Order;
 import com.sh.sh.pos.system.model.OrderItem;
-import com.sh.sh.pos.system.model.Product;
 import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.payload.dto.OrderDTO;
 import com.sh.sh.pos.system.repository.OrderItemRepository;
 import com.sh.sh.pos.system.repository.OrderRepository;
@@ -64,12 +66,12 @@ public class OrderServiceImpl implements OrderService {
 					return OrderItem.builder()
 							.product(product)
 							.quantity(itemDTO.getQuantity())
-							.price(product.getSellingPrice() * itemDTO.getQuantity())
+							.price(product.getSellingPrice().multiply(BigDecimal.valueOf(itemDTO.getQuantity())))
 							.order(order)
 							.build();
 
 				}).toList();
-		double total = orderItems.stream().mapToDouble(OrderItem::getPrice).sum();
+		BigDecimal total = orderItems.stream().map(OrderItem::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
 		order.setTotalAmount(total);
 		order.setItems(orderItems);
 		return OrderMapper.toDTO(orderRepository.save(order));

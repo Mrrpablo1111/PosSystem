@@ -8,4 +8,6 @@ import com.sh.sh.pos.system.model.Branch;
 
 public interface BranchRepository extends JpaRepository<Branch, Long> {
 	List<Branch> findByStoreId(Long storeId);
+
+	
 }

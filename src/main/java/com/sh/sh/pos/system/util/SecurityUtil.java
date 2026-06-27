@@ -8,9 +8,9 @@ import com.sh.sh.pos.system.domain.UserRole;
 import com.sh.sh.pos.system.exceptions.UserException;
 import com.sh.sh.pos.system.model.Branch;
 import com.sh.sh.pos.system.model.Inventory;
-import com.sh.sh.pos.system.model.Product;
 import com.sh.sh.pos.system.model.Store;
 import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.service.UserService;
 
 import lombok.AllArgsConstructor;

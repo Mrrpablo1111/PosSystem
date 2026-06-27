@@ -1,5 +1,6 @@
 package com.sh.sh.pos.system.payload.dto;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,22 +16,26 @@ import lombok.Data;
 public class OrderDTO {
 
 	private Long id;
-	
-	private Double totalAmount;
-	
-	private LocalDateTime createdAt;
-	
 
+	private BigDecimal totalAmount;
+
+	private LocalDateTime createdAt;
+
+	private BigDecimal discountAmount;
+
+	private BigDecimal taxAmount;
+
+	private BigDecimal grandTotal;
+
+	private String receiptNumber;
 	private Long branchId;
 	private Long customerId;
-	
 
 	private UserDTO cashier;
-	
-	private PaymentType paymentType;
-	
-	private Customer customer;
-	
 
-	private List<OrderItemDTO > items;
+	private PaymentType paymentType;
+
+	private Customer customer;
+
+	private List<OrderItemDTO> items;
 }

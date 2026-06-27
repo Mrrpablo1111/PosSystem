@@ -11,7 +11,7 @@ import com.sh.sh.pos.system.exceptions.UserException;
 import com.sh.sh.pos.system.mapper.InventoryMapper;
 import com.sh.sh.pos.system.model.Branch;
 import com.sh.sh.pos.system.model.Inventory;
-import com.sh.sh.pos.system.model.Product;
+import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.payload.dto.InventoryDTO;
 import com.sh.sh.pos.system.repository.BranchRepository;
 import com.sh.sh.pos.system.repository.InventoryRepository;

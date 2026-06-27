@@ -5,19 +5,23 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
-import com.sh.sh.pos.system.model.Customer;
+
+import com.sh.sh.pos.system.payload.dto.CustomerDTO;
 
 @Service
 public interface CustomerService {
-	Customer createCustomer(Customer customer);
-	
-	Customer updateCustomer(Long id, Customer customer) throws ResourceNotFoundException;
-	
-	void deleteCustomer(Long id) throws ResourceNotFoundException;
-	
-	Customer getCustomerById(Long id) throws ResourceNotFoundException;
-	
-	List<Customer> getAllCustomers();
-	
-	List<Customer> searchCustomers(String keyword);
+	CustomerDTO createCustomer(CustomerDTO dto);
+
+    CustomerDTO updateCustomer(Long id, CustomerDTO dto)
+            throws ResourceNotFoundException;
+
+    void deleteCustomer(Long id)
+            throws ResourceNotFoundException;
+
+    CustomerDTO getCustomerById(Long id)
+            throws ResourceNotFoundException;
+
+    List<CustomerDTO> getAllCustomers();
+
+    List<CustomerDTO> searchCustomers(String keyword);
 }

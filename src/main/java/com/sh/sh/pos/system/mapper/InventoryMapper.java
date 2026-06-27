@@ -2,7 +2,7 @@ package com.sh.sh.pos.system.mapper;
 
 import com.sh.sh.pos.system.model.Branch;
 import com.sh.sh.pos.system.model.Inventory;
-import com.sh.sh.pos.system.model.Product;
+import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.payload.dto.InventoryDTO;
 
 public class InventoryMapper {

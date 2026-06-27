@@ -1,5 +1,6 @@
 package com.sh.sh.pos.system.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,7 +36,7 @@ public class Refund {
 	
 	private String reason;
 	
-	private Double amount;
+	private BigDecimal amount;
 	
 	@ManyToOne
 	@JsonIgnore
