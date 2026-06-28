@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.StoreStatus;
 import com.sh.sh.pos.system.domain.UserRole;
@@ -26,7 +27,9 @@ import com.sh.sh.pos.system.service.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StoreServiceImpl implements StoreService {
@@ -38,98 +41,89 @@ public class StoreServiceImpl implements StoreService {
 	private final PasswordEncoder passwordEncoder;
 
 	@Override
+	@Transactional
 	public StoreDTO createStore(StoreDTO storeDTO, User user) {
 		Store store = StoreMapper.toEntity(storeDTO, user);
-
-		return StoreMapper.toDTO(storeRepository.save(store));
+        Store saved = storeRepository.save(store);
+        log.info("✅ Store created: id={} brand={}", saved.getId(), saved.getBrand());
+        return StoreMapper.toDTO(saved);
 	}
 
 	@Override
 	public StoreDTO getStoreById(Long id) throws ResourceNotFoundException {
-		Store store = storeRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Store not found"));
-		return StoreMapper.toDTO(store);
+		  Store store = findStoreOrThrow(id);
+        return StoreMapper.toDTO(store);
 	}
 
 	@Override
 	public List<StoreDTO> getAllStores(StoreStatus status) {
-		List<Store> stores;
-		if (status != null) {
-			stores = storeRepository.findByStatus(status);
-		} else {
-			stores = storeRepository.findAll();
-		}
-
-		return stores.stream()
-				.map(StoreMapper::toDTO)
-				.collect(Collectors.toList());
+		List<Store> stores = status != null
+                ? storeRepository.findByStatus(status)
+                : storeRepository.findAll();
+ 
+        return stores.stream()
+                .map(StoreMapper::toDTO)
+                .collect(Collectors.toList());
 
 	}
 
 	@Override
 	public Store getStoreByAdminId() throws UserException {
 		User admin = userService.getCurrentUser();
-		return storeRepository.findByStoreAdminId(admin.getId());
+        return storeRepository.findByStoreAdminId(admin.getId());
 	}
 
 	@Override
-	public StoreDTO updateStore(Long id, StoreDTO storeDTO) throws UserException {
-		User currentUser = userService.getCurrentUser();
+    @Transactional
+    public StoreDTO updateStore(Long id, StoreDTO dto) throws UserException {
+        User currentUser = userService.getCurrentUser();
+        Store store      = storeRepository.findByStoreAdminId(currentUser.getId());
+ 
+        if (store == null) {
+            throw new UserException("Store not found for current user");
+        }
+ 
+        StoreMapper.updateEntity(store, dto);
+        Store updated = storeRepository.save(store);
+        log.info("✅ Store updated: id={}", updated.getId());
+        return StoreMapper.toDTO(updated);
+    }
+ 
 
-		Store existing = storeRepository.findByStoreAdminId(currentUser.getId());
-
-		if (existing == null) {
-			throw new UserException("store not found");
-		}
-
-		existing.setBrand(storeDTO.getBrand());
-		existing.setDescription(storeDTO.getDescription());
-
-		if (storeDTO.getStoreType() != null) {
-			existing.setStoreType(storeDTO.getStoreType());
-		}
-		if (storeDTO.getContact() != null) {
-			StoreContact contact = StoreContact.builder()
-					.address(storeDTO.getContact().getAddress())
-					.phone(storeDTO.getContact().getPhone())
-					.email(storeDTO.getContact().getEmail())
-					.build();
-			existing.setContact(contact);
-		}
-		Store updateStore = storeRepository.save(existing);
-
-		return StoreMapper.toDTO(updateStore);
+	 @Override
+    @Transactional
+    public UserDTO addEmployee(Long id, UserDTO userDto) throws UserException {
+        Store store    = getStoreByAdminId();
+        User  employee = UserMapper.toEntity(userDto);
+ 
+        switch (userDto.getRole()) {
+            case ROLE_STORE_MANAGER -> employee.setStore(store);
+            case ROLE_BRANCH_MANAGER -> {
+                Branch branch = branchRepository.findById(userDto.getBranchId())
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "Branch not found: " + userDto.getBranchId()));
+                employee.setBranch(branch);
+                employee.setStore(store);
+            }
+            default -> throw new UserException("Invalid employee role: " + userDto.getRole());
+        }
+ 
+        employee.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        User saved = userRepository.save(employee);
+        log.info("✅ Employee added: id={} role={}", saved.getId(), saved.getRole());
+        return UserMapper.toDTO(saved);
 	}
 
 	@Override
-	public UserDTO addEmployee(Long id, UserDTO userDto) throws UserException {
-		Store store = getStoreByAdminId();
-
-		User employee = UserMapper.toEntity(userDto);
-		if (userDto.getRole() == UserRole.ROLE_STORE_MANAGER) {
-			employee.setStore(store);
-		} else if (userDto.getRole() == UserRole.ROLE_BRANCH_MANAGER) {
-			Branch branch = branchRepository.findById(userDto.getBranchId()).orElseThrow(
-					() -> new EntityNotFoundException("branch not found"));
-			employee.setBranch(branch);
-			employee.setStore(store);
-		}
-
-		employee.setPassword(passwordEncoder.encode(userDto.getPassword()));
-		User addedEmployee = userRepository.save(employee);
-
-		return UserMapper.toDTO(addedEmployee);
-	}
-
-	@Override
-	public void deletedStore() throws ResourceNotFoundException, UserException {
-		Store store = getStoreByAdminId();
-		if (store == null) {
-			throw new ResourceNotFoundException("Store not found");
-		}
-		storeRepository.deleteById(store.getId());
-
-	}
+    @Transactional
+    public void deletedStore() throws ResourceNotFoundException, UserException {
+        Store store = getStoreByAdminId();
+        if (store == null) {
+            throw new ResourceNotFoundException("Store not found");
+        }
+        storeRepository.deleteById(store.getId());
+        log.info("✅ Store deleted: id={}", store.getId());
+    }
 
 	@Override
 	public StoreDTO getStoreByEmployee() throws UserException {
@@ -142,28 +136,42 @@ public class StoreServiceImpl implements StoreService {
 	}
 
 	@Override
-	public StoreDTO moderateStore(Long id, StoreStatus status) throws ResourceNotFoundException {
-		Store store = storeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("store not found"));
-		store.setStatus(status);
-		Store updatedStore = storeRepository.save(store);
-		return StoreMapper.toDTO(updatedStore);
-	}
+    @Transactional
+    public StoreDTO moderateStore(Long id, StoreStatus status)
+            throws ResourceNotFoundException {
+        Store store = findStoreOrThrow(id);
+        store.setStatus(status);
+        Store updated = storeRepository.save(store);
+        log.info("✅ Store status updated: id={} status={}", id, status);
+        return StoreMapper.toDTO(updated);
+    }
 
 	@Override
-	public List<UserDTO> getEmployeesByStore(Long storeId) throws UserException {
-		User currentUser = userService.getCurrentUser();
+    public List<UserDTO> getEmployeesByStore(Long storeId) throws UserException {
+        User  currentUser = userService.getCurrentUser();
+        Store store       = storeRepository.findById(storeId)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Store not found: " + storeId));
+ 
+        boolean isAdmin   = store.getStoreAdmin().getId().equals(currentUser.getId());
+        boolean isMember  = currentUser.getStore() != null &&
+                            currentUser.getStore().getId().equals(store.getId());
+ 
+        if (!isAdmin && !isMember) {
+            throw new UserException("You do not have permission to access this store");
+        }
+ 
+        return userRepository.findByStoreId(storeId)
+                .stream()
+                .map(UserMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 
-		Store store = storeRepository.findById(storeId).orElseThrow(
-				() -> new EntityNotFoundException("store not found"));
-		if (store.getStoreAdmin().getId().equals(currentUser.getId())
-				|| currentUser.getStore().getId().equals(store.getId())) {
-			List<User> employees = userRepository.findByStoreId(storeId);
-			return UserMapper.toDTOList(employees);
-		}
-
-		throw new UserException("user does not have enough permissions to access this store");
-	}
-
+	private Store findStoreOrThrow(Long id) throws ResourceNotFoundException {
+        return storeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Store not found: " + id));
+    }
 
 	
 

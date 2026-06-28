@@ -1,4 +1,4 @@
- package com.sh.sh.pos.system.model;
+package com.sh.sh.pos.system.model;
 
 import java.time.LocalDateTime;
 
@@ -7,9 +7,13 @@ import com.sh.sh.pos.system.domain.StoreStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -31,40 +35,47 @@ import lombok.Setter;
 @EqualsAndHashCode
 @Builder
 public class Store {
-	
+
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id", nullable = false)
 	private Long id;
-	
+
 	@Column(nullable = false)
 	@NotBlank(message = "brand name is required")
 	private String brand;
-	
-	@OneToOne
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "store_admin_id", nullable = false)
 	private User storeAdmin;
-	
+
+	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
+
 	private LocalDateTime updatedAt;
-	
+
 	private String description;
-	
-	private String storeType; 
-	
+
+	private String storeType;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
 	private StoreStatus status;
-	
+
 	@Embedded
-	private StoreContact contact = new StoreContact(); 
-	
+	private StoreContact contact;
+
 	@PrePersist
 	protected void onCreate() {
-		createdAt = LocalDateTime.now();
-		status = StoreStatus.PENDDING;
+		 createdAt = LocalDateTime.now();
+        if (status == null) {
+            status = StoreStatus.PENDING;
+        }
 	}
-	
+
 	@PreUpdate
 	protected void onUpdate() {
 		updatedAt = LocalDateTime.now();
 	}
-	
-	
+
 }
