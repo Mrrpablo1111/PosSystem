@@ -21,13 +21,19 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
 
   # ── Redis ───────────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: sh-pos-redis
     restart: unless-stopped
-    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
     ports:
       - "6379:6379"
     volumes:
@@ -72,16 +78,18 @@ services:
       APP_ENCRYPT_SECRET: ${APP_ENCRYPT_SECRET}
       APP_ENCRYPT_IV:     ${APP_ENCRYPT_IV}
 
-      # Active profile
-      SPRING_PROFILES_ACTIVE: prod
-
     networks:
       - pos-network
 
 volumes:
   mysql-data:
+    name: sh-pos-mysql-data
+    driver: local
   redis-data:
+    name: sh-pos-redis-data
+    driver: local
 
 networks:
   pos-network:
+    name: sh-pos-network
     driver: bridge
