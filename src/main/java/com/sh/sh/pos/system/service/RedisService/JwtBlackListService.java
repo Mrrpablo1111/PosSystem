@@ -6,7 +6,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JwtBlackListService {
@@ -15,38 +17,26 @@ public class JwtBlackListService {
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
     // BLACKLIST TOKEN
-    public void blacklistToken(String token, long expirationTime) {
+    public void blacklistToken(String token, long expirationMillis) {
         String key = BLACKLIST_PREFIX + token;
-        redisTemplate.opsForValue().set(
-                key,
-                "logged_out",
-                expirationTime,
-                TimeUnit.MILLISECONDS);
-        System.out.println("KEY : " + key);
-        System.out.println("EXPIRE IN : " + expirationTime + " ms");
-        System.out.println(" TOKEN BLACKLISTED");
+        redisTemplate.opsForValue().set(key, "logged_out", expirationMillis, TimeUnit.MILLISECONDS);
+        log.info("🔒 Token blacklisted — expires in {}s", expirationMillis / 1000);
     }
 
     //  // CHECK BLACKLIST
     public boolean isBlacklisted(String token) {
-        String key = BLACKLIST_PREFIX + token;
-        Boolean exists = redisTemplate.hasKey(key);
-        return Boolean.TRUE.equals(exists);
+           return Boolean.TRUE.equals(redisTemplate.hasKey(BLACKLIST_PREFIX + token));
     }
 
     public void removeFromBlacklist(String token){
-        String key =  BLACKLIST_PREFIX + token;
-        redisTemplate.delete(key);
-         System.out.println("TOKEN REMOVED FROM BLACKLIST");
+      redisTemplate.delete(BLACKLIST_PREFIX + token);
+        log.info("🔓 Token removed from blacklist");
     }
     
     // GET REMAINING TTL
      public long getRemainingTime(String token) {
 
-        String key = BLACKLIST_PREFIX + token;
-
-        Long ttl = redisTemplate.getExpire(key, TimeUnit.SECONDS);
-
+          Long ttl = redisTemplate.getExpire(BLACKLIST_PREFIX + token, TimeUnit.SECONDS);
         return ttl != null ? ttl : 0;
     }
 }

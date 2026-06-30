@@ -23,18 +23,18 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 
-public class CategoryServiceImpl implements CategoryService{
-	
+public class CategoryServiceImpl implements CategoryService {
+
 	private final CategoryRepository categoryRepository;
 	private final UserService userService;
 	private final StoreRepository storeRepository;
+
 	@Override
 	public CategoryDTO createCategory(CategoryDTO dto) throws UserException {
 		User user = userService.getCurrentUser();
-		
+
 		Store store = storeRepository.findById(dto.getStoreId()).orElseThrow(
-				() -> new EntityNotFoundException("Store not found") 
-				);
+				() -> new EntityNotFoundException("Store not found"));
 		checkAuthority(user, store);
 		Category category = Category.builder()
 				.store(store)
@@ -42,51 +42,59 @@ public class CategoryServiceImpl implements CategoryService{
 				.build();
 
 		return CategoryMapper.toDTO(categoryRepository.save(category));
-		
+
 	}
 
 	@Override
 	public List<CategoryDTO> getCategoriesByStore(Long storeId) {
-		
+
 		return categoryRepository.findByStoreId(storeId).stream()
-                .map(CategoryMapper::toDTO)
-                .collect(Collectors.toList());
+				.map(CategoryMapper::toDTO)
+				.collect(Collectors.toList());
 	}
- 
+
 	@Override
 	public CategoryDTO updateCategory(Long id, CategoryDTO dto) throws UserException {
-		
+
 		Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+				.orElseThrow(() -> new EntityNotFoundException("Category not found"));
 
-        User user = userService.getCurrentUser();
-        checkAuthority(user, category.getStore());
+		User user = userService.getCurrentUser();
 
-        category.setName(dto.getName());
-        return CategoryMapper.toDTO(categoryRepository.save(category));
+		Store store = storeRepository.findByIdWithAdmin(category.getStore().getId())
+				.orElseThrow(() -> new EntityNotFoundException("Store not found"));
+
+		checkAuthority(user, store);
+		category.setName(dto.getName());
+		return CategoryMapper.toDTO(categoryRepository.save(category));
 	}
 
 	@Override
 	public void deleteCategory(Long id) throws UserException {
-		Category category = categoryRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("category not exists"));
+		Category category = categoryRepository.findById(id)
+				.orElseThrow(() -> new EntityNotFoundException("category not exists"));
 		User user = userService.getCurrentUser();
-		
-		checkAuthority(user, category.getStore());
-		
+
+		 Store store = storeRepository.findByIdWithAdmin(category.getStore().getId())
+            .orElseThrow(() -> new EntityNotFoundException("Store not found"));
+
+		checkAuthority(user, store);
+
 		categoryRepository.delete(category);
-		
+
 	}
-	
+
 	private void checkAuthority(User user, Store store) {
 		boolean isAdmin = user.getRole().equals(UserRole.ROLE_STORE_ADMIN);
 		boolean isManager = user.getRole().equals(UserRole.ROLE_STORE_MANAGER);
-		boolean isSameStore = user.equals(store.getStoreAdmin());
+		boolean isSameStore = store.getStoreAdmin() != null &&
+                          store.getStoreAdmin().getId().equals(user.getId());
+
 		
-		if(!(isAdmin && isSameStore) && !isManager) {
-			throw new SecurityException("you don't have permission to manage this category");
-		}
+    if (isAdmin && isSameStore) return;
+    if (isManager) return;
+
+    throw new SecurityException("You don't have permission to manage this category");
 	}
-	
-	
 
 }
