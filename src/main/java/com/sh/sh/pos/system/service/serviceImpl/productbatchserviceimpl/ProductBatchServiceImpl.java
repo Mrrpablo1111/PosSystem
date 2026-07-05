@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.mapper.productbatchmapper.ProductBatchMapper;
 import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.products.Product;
@@ -19,7 +21,6 @@ import com.sh.sh.pos.system.repository.productvariantrepository.ProductVariantRe
 import com.sh.sh.pos.system.repository.suppliersrepository.SupplierRepository;
 import com.sh.sh.pos.system.service.productservice.ProductBatchService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -35,6 +36,7 @@ public class ProductBatchServiceImpl implements ProductBatchService {
     // ── Create ──────────────────────────────────────────────────────────────
 
     @Override
+    @Transactional
     public ProductBatchDTO create(ProductBatchDTO dto) {
         Product product = findProduct(dto.getProductId());
         Branch branch = findBranch(dto.getBranchId());
@@ -87,6 +89,7 @@ public class ProductBatchServiceImpl implements ProductBatchService {
     // ── Update ───────────────────────────────────────────────────────────────
 
     @Override
+    @Transactional
     public ProductBatchDTO update(Long id, ProductBatchDTO dto) {
         ProductBatch batch = findBatch(id);
 
@@ -119,6 +122,7 @@ public class ProductBatchServiceImpl implements ProductBatchService {
     // ── Delete ───────────────────────────────────────────────────────────────
 
     @Override
+    @Transactional
     public void delete(Long id) {
         batchRepository.delete(findBatch(id));
     }
@@ -131,30 +135,32 @@ public class ProductBatchServiceImpl implements ProductBatchService {
 
     private ProductBatch findBatch(Long id) {
         return batchRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Batch not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Batch not found with id: " + id));
     }
 
     private Product findProduct(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
     }
 
     private Branch findBranch(Long id) {
         return branchRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Branch not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Branch not found with id: " + id));
     }
 
     private Supplier resolveSupplier(Long supplierId) {
-        if (supplierId == null)
+        if (supplierId == null) {
             return null;
+        }
         return supplierRepository.findById(supplierId)
-                .orElseThrow(() -> new EntityNotFoundException("Supplier not found: " + supplierId));
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found with id: " + supplierId));
     }
 
     private ProductVariant resolveVariant(Long variantId) {
-        if (variantId == null)
+        if (variantId == null) {
             return null;
+        }
         return variantRepository.findById(variantId)
-                .orElseThrow(() -> new EntityNotFoundException("Variant not found: " + variantId));
+                .orElseThrow(() -> new ResourceNotFoundException("Variant not found with id: " + variantId));
     }
 }
