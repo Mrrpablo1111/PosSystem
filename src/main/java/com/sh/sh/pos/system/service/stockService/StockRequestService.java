@@ -1,10 +1,10 @@
-package com.sh.sh.pos.system.service.stockService;
+package com.sh.sh.pos.system.service.stockservice;
 
 import java.util.List;
 
 import com.sh.sh.pos.system.domain.StockRequestStatus;
-import com.sh.sh.pos.system.model.User;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockRequestDTO;
+import com.sh.sh.pos.system.model.user.User;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockRequestDTO;
 
 public interface StockRequestService {
     StockRequestDTO create(StockRequestDTO dto, User user);

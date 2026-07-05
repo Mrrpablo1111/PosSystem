@@ -8,7 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-import com.sh.sh.pos.system.model.Branch;
+import com.sh.sh.pos.system.model.branch.Branch;
 
 @Entity
 @Table(name = "warehouses")

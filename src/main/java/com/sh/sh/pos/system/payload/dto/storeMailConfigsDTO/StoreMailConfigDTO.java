@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.storeMailConfigsDTO;
+package com.sh.sh.pos.system.payload.dto.storemailconfigsdto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

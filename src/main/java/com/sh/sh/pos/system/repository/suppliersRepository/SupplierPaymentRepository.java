@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.repository.suppliersRepository;
+package com.sh.sh.pos.system.repository.suppliersrepository;
 
 import java.util.List;
 

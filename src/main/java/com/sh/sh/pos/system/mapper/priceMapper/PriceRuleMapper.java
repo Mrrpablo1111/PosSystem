@@ -1,13 +1,16 @@
-package com.sh.sh.pos.system.mapper.priceMapper;
+package com.sh.sh.pos.system.mapper.pricemapper;
 
-import com.sh.sh.pos.system.model.Branch;
+import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.price.PriceGroup;
 import com.sh.sh.pos.system.model.price.PriceRule;
 import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.model.products.ProductVariant;
-import com.sh.sh.pos.system.payload.dto.priceDTO.PriceRuleDTO;
+import com.sh.sh.pos.system.payload.dto.pricedto.PriceRuleDTO;
 
 public class PriceRuleMapper {
+    private PriceRuleMapper() {
+    }
+
     public static PriceRuleDTO toDTO(PriceRule rule) {
         return PriceRuleDTO.builder()
                 .id(rule.getId())
@@ -27,11 +30,11 @@ public class PriceRuleMapper {
                 .fixedPrice(rule.getFixedPrice())
                 .discountPercent(rule.getDiscountPercent())
                 .markupPercent(rule.getMarkupPercent())
-                .minQuantity(rule.getMinQuantity())
+                .minQuantity(rule.getMinQuantity() != null ? rule.getMinQuantity() : 1)
                 .startDate(rule.getStartDate())
                 .endDate(rule.getEndDate())
-                .priority(rule.getPriority())
-                .active(rule.getActive())
+                .priority(rule.getPriority() != null ? rule.getPriority() : 1)
+                .active(!Boolean.FALSE.equals(rule.getActive())) 
                 .createdAt(rule.getCreatedAt())
                 .build();
     }
@@ -56,7 +59,7 @@ public class PriceRuleMapper {
                 .startDate(dto.getStartDate())
                 .endDate(dto.getEndDate())
                 .priority(dto.getPriority() != null ? dto.getPriority() : 1)
-                .active(dto.getActive() != null ? dto.getActive() : true)
+                .active(!Boolean.FALSE.equals(dto.getActive()))
                 .build();
     }
 }

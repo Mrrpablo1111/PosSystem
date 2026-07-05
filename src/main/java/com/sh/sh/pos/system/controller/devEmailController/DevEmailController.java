@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.devEmailController;
+package com.sh.sh.pos.system.controller.devemailcontroller;
 
 
 

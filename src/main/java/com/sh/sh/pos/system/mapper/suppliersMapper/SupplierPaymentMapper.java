@@ -1,14 +1,14 @@
-package com.sh.sh.pos.system.mapper.suppliersMapper;
+package com.sh.sh.pos.system.mapper.suppliersmapper;
 
 import com.sh.sh.pos.system.domain.PaymentMethod;
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
 
 import com.sh.sh.pos.system.model.suppliers.Supplier;
 import com.sh.sh.pos.system.model.suppliers.SupplierPayment;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierPaymentDTO;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierPaymentDTO;
 
 public class SupplierPaymentMapper {
-
+    private SupplierPaymentMapper() {}
     public static SupplierPayment toEntity(
             SupplierPaymentDTO dto,
             Supplier supplier,

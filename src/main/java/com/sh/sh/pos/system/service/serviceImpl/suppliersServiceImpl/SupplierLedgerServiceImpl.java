@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl.suppliersServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.suppliersserviceimpl;
 
 
 import java.math.BigDecimal;
@@ -6,14 +6,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.sh.sh.pos.system.mapper.suppliersMapper.SupplierLedgerMapper;
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.mapper.suppliersmapper.SupplierLedgerMapper;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierLedgerDTO;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierLedgerInvoiceDTO;
-import com.sh.sh.pos.system.repository.purchaseInvoicesRepository.PurchaseInvoiceRepository;
-import com.sh.sh.pos.system.repository.suppliersRepository.SupplierRepository;
-import com.sh.sh.pos.system.service.suppliersService.SupplierLedgerService;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierLedgerDTO;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierLedgerInvoiceDTO;
+import com.sh.sh.pos.system.repository.purchaseinvoicesrepository.PurchaseInvoiceRepository;
+import com.sh.sh.pos.system.repository.suppliersrepository.SupplierRepository;
+import com.sh.sh.pos.system.service.suppliersservice.SupplierLedgerService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

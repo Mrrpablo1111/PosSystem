@@ -1,17 +1,20 @@
-package com.sh.sh.pos.system.service.serviceImpl.suppliersServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.suppliersserviceimpl;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.SupplierStatus;
-import com.sh.sh.pos.system.mapper.suppliersMapper.SupplierMapper;
-import com.sh.sh.pos.system.model.Store;
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
+import com.sh.sh.pos.system.exception.UserException;
+import com.sh.sh.pos.system.mapper.suppliersmapper.SupplierMapper;
+import com.sh.sh.pos.system.model.store.Store;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierDTO;
-import com.sh.sh.pos.system.repository.StoreRepository;
-import com.sh.sh.pos.system.repository.suppliersRepository.SupplierRepository;
-import com.sh.sh.pos.system.service.suppliersService.SupplierService;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierDTO;
+import com.sh.sh.pos.system.repository.storerepository.StoreRepository;
+import com.sh.sh.pos.system.repository.suppliersrepository.SupplierRepository;
+import com.sh.sh.pos.system.service.suppliersservice.SupplierService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,13 +26,15 @@ public class SupplierServiceImpl implements SupplierService {
     private final StoreRepository storeRepository;
 
     @Override
+    @Transactional
     public SupplierDTO create(SupplierDTO dto) {
 
         Store store = storeRepository.findById(dto.getStoreId())
-                .orElseThrow(() -> new RuntimeException("Store not found"));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Store not found with id: " + dto.getStoreId()));
 
         if (supplierRepository.existsByCode(dto.getCode())) {
-            throw new RuntimeException("Supplier code already exists");
+            throw new UserException("Supplier code already exists: " + dto.getCode());
         }
 
         Supplier supplier = Supplier.builder()
@@ -51,10 +56,10 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
+    @Transactional
     public SupplierDTO update(Long id, SupplierDTO dto) {
 
-        Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+        Supplier supplier = findSupplierOrThrow(id);
 
         supplier.setName(dto.getName());
         supplier.setPhone(dto.getPhone());
@@ -70,15 +75,13 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SupplierDTO getById(Long id) {
-
-        Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
-
-        return SupplierMapper.toDTO(supplier);
+        return SupplierMapper.toDTO(findSupplierOrThrow(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SupplierDTO> getByStore(Long storeId) {
         return supplierRepository.findByStoreId(storeId)
                 .stream()
@@ -87,24 +90,28 @@ public class SupplierServiceImpl implements SupplierService {
     }
 
     @Override
+    @Transactional
     public void inactive(Long id) {
-
-        Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
-
-        supplier.setStatus(SupplierStatus.INACTIVE);
-
-        supplierRepository.save(supplier);
+        setStatus(id, SupplierStatus.INACTIVE);
     }
 
     @Override
+    @Transactional
     public void activate(Long id) {
+        setStatus(id, SupplierStatus.ACTIVE);
+    }
 
-        Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+    // ── Helpers ───────────────────────────────────────────────────────────
 
-        supplier.setStatus(SupplierStatus.ACTIVE);
+    private Supplier findSupplierOrThrow(Long id) {
+        return supplierRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Supplier not found with id: " + id));
+    }
 
+    private void setStatus(Long id, SupplierStatus status) {
+        Supplier supplier = findSupplierOrThrow(id);
+        supplier.setStatus(status);
         supplierRepository.save(supplier);
     }
 }

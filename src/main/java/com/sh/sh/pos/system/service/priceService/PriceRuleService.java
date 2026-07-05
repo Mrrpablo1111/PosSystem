@@ -1,8 +1,8 @@
-package com.sh.sh.pos.system.service.priceService;
+package com.sh.sh.pos.system.service.priceservice;
 
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.priceDTO.PriceRuleDTO;
+import com.sh.sh.pos.system.payload.dto.pricedto.PriceRuleDTO;
 
 public interface PriceRuleService {
     PriceRuleDTO create(PriceRuleDTO dto);

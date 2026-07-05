@@ -1,6 +1,6 @@
-package com.sh.sh.pos.system.service.suppliersService;
+package com.sh.sh.pos.system.service.suppliersservice;
 
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierPaymentDTO;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierPaymentDTO;
 
 public interface SupplierPaymentService {
 

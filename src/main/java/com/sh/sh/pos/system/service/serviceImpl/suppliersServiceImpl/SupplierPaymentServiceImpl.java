@@ -1,18 +1,18 @@
-package com.sh.sh.pos.system.service.serviceImpl.suppliersServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.suppliersserviceimpl;
 
 import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
 
 import com.sh.sh.pos.system.domain.PaymentStatus;
-import com.sh.sh.pos.system.mapper.suppliersMapper.SupplierPaymentMapper;
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.mapper.suppliersmapper.SupplierPaymentMapper;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
 import com.sh.sh.pos.system.model.suppliers.SupplierPayment;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierPaymentDTO;
-import com.sh.sh.pos.system.repository.purchaseInvoicesRepository.PurchaseInvoiceRepository;
-import com.sh.sh.pos.system.repository.suppliersRepository.SupplierPaymentRepository;
-import com.sh.sh.pos.system.service.suppliersService.SupplierPaymentService;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierPaymentDTO;
+import com.sh.sh.pos.system.repository.purchaseinvoicesrepository.PurchaseInvoiceRepository;
+import com.sh.sh.pos.system.repository.suppliersrepository.SupplierPaymentRepository;
+import com.sh.sh.pos.system.service.suppliersservice.SupplierPaymentService;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;

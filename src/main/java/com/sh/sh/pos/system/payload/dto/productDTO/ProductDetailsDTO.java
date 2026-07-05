@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.productDTO;
+package com.sh.sh.pos.system.payload.dto.productdto;
 
 import java.math.BigDecimal;
 import java.util.List;

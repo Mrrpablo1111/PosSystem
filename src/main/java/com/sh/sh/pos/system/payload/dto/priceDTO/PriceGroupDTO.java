@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.priceDTO;
+package com.sh.sh.pos.system.payload.dto.pricedto;
 
 import java.time.LocalDateTime;
 

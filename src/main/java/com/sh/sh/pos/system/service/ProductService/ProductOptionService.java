@@ -1,8 +1,8 @@
-package com.sh.sh.pos.system.service.ProductService;
+package com.sh.sh.pos.system.service.productservice;
 
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.productDTO.ProductOptionDTO;
+import com.sh.sh.pos.system.payload.dto.productdto.ProductOptionDTO;
 
 public interface ProductOptionService {
 

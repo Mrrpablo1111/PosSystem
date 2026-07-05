@@ -5,8 +5,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.sh.sh.pos.system.domain.UnitType;
-import com.sh.sh.pos.system.model.Category;
-import com.sh.sh.pos.system.model.Store;
+import com.sh.sh.pos.system.model.category.Category;
+import com.sh.sh.pos.system.model.store.Store;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
 
 import jakarta.persistence.CascadeType;

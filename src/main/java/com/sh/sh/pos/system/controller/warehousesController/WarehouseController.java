@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.warehousesController;
+package com.sh.sh.pos.system.controller.warehousescontroller;
 
 
 import lombok.RequiredArgsConstructor;
@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.sh.sh.pos.system.payload.dto.warehousesDTO.WarehouseDTO;
-import com.sh.sh.pos.system.service.warehousesService.WarehouseService;
+import com.sh.sh.pos.system.payload.dto.warehousesdto.WarehouseDTO;
+import com.sh.sh.pos.system.service.warehousesservice.WarehouseService;
 
 import java.util.List;
 

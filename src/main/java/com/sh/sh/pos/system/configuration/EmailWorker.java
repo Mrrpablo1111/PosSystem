@@ -9,15 +9,13 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-
-import com.sh.sh.pos.system.model.purchasesOrder.PurchaseOrder;
-import com.sh.sh.pos.system.model.storeMailConfigs.StoreMailConfig;
-import com.sh.sh.pos.system.payload.dto.EmailDTO;
-
-import com.sh.sh.pos.system.repository.purchasesOrderRepository.PurchaseOrderRepository;
-import com.sh.sh.pos.system.repository.storeMailConfigsRepository.StoreMailConfigRepository;
-import com.sh.sh.pos.system.service.emailService.DynamicMailSender;
-import com.sh.sh.pos.system.service.purchaseOrdersPdfService.PurchaseOrderPdfService;
+import com.sh.sh.pos.system.model.purchasesorder.PurchaseOrder;
+import com.sh.sh.pos.system.model.storemailconfigs.StoreMailConfig;
+import com.sh.sh.pos.system.payload.dto.emaildto.EmailDTO;
+import com.sh.sh.pos.system.repository.purchasesorderrepository.PurchaseOrderRepository;
+import com.sh.sh.pos.system.repository.storemailconfigsrepository.StoreMailConfigRepository;
+import com.sh.sh.pos.system.service.emailservice.DynamicMailSender;
+import com.sh.sh.pos.system.service.purchaseorderspdfservice.PurchaseOrderPdfService;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +38,7 @@ public class EmailWorker {
     private String fromName;
 
     private static final String EMAIL_QUEUE = "email-queue";
+    private static final String EMAIL_QUEUE_FAILED = "email-queue-failed";
 
     public EmailWorker(
             @Qualifier("emailRedisTemplate") RedisTemplate<String, EmailDTO> redisTemplate,
@@ -56,58 +55,32 @@ public class EmailWorker {
         this.pdfService              = pdfService;
     }
 
+    // ── Consumer ──────────────────────────────────────────────────────────────
+
     @Scheduled(fixedDelay = 3000)
     public void consumeQueue() {
         try {
             EmailDTO dto = redisTemplate.opsForList().rightPop(EMAIL_QUEUE);
-            if (dto == null) return;
+            if (dto == null) {
+                return;
+            }
 
             log.info("📬 Dequeued → to={} storeId={} purchaseOrderId={}",
                     dto.getTo(), dto.getStoreId(), dto.getPurchaseOrderId());
 
-            if (dto.getTo() == null || dto.getTo().isBlank()) {
-                log.warn("⚠️  Skipped — to is blank");
+            String to = sanitizeAddress(dto.getTo());
+            if (to == null) {
+                log.warn("⚠️  Skipped — recipient invalid or blank: raw='{}'", dto.getTo());
                 return;
             }
+            dto.setTo(to);
 
-            // ── Generate PDF ──────────────────────────────────────────────
-            byte[] pdfBytes = null;
-            String pdfName  = null;
+            PdfResult pdf = generatePdfIfNeeded(dto);
 
-            if (dto.getPurchaseOrderId() != null) {
-                try {
-                    // FIX: use findByIdWithAllRelations — loads items, supplier,
-                    // branch, store, currency eagerly so no LazyInitializationException
-                    PurchaseOrder order = purchaseOrderRepository
-                            .findByIdWithAllRelations(dto.getPurchaseOrderId())
-                            .orElse(null);
-
-                    if (order == null) {
-                        log.error("❌ PO not found: id={}", dto.getPurchaseOrderId());
-                    } else {
-                        log.info("✅ PO loaded → poNumber={} items={}",
-                                order.getPoNumber(),
-                                order.getItems() != null ? order.getItems().size() : 0);
-
-                        pdfBytes = pdfService.generatePdf(order);
-
-                        if (pdfBytes != null && pdfBytes.length > 0) {
-                            pdfName = "PurchaseOrder-" + order.getPoNumber() + ".pdf";
-                            log.info("✅ PDF generated → {} bytes", pdfBytes.length);
-                        } else {
-                            log.error("❌ PDF generation returned empty");
-                        }
-                    }
-                } catch (Exception e) {
-                    log.error("❌ PDF generation failed: {}", e.getMessage(), e);
-                }
-            }
-
-            // ── Send ──────────────────────────────────────────────────────
             if (dto.getStoreId() != null) {
-                sendViaStoreConfig(dto, pdfBytes, pdfName);
+                sendViaStoreConfig(dto, pdf.bytes(), pdf.name());
             } else {
-                sendViaGlobalConfig(dto, pdfBytes, pdfName);
+                sendViaGlobalConfig(dto, pdf.bytes(), pdf.name());
             }
 
         } catch (Exception e) {
@@ -115,7 +88,95 @@ public class EmailWorker {
         }
     }
 
-    // ── Store Gmail ───────────────────────────────────────────────────────
+    /**
+     * Trims whitespace and strips trailing separators. Returns null if nothing
+     * usable remains — a trailing comma/semicolon in a stored address otherwise
+     * produces JavaMail's "Empty address in string" error.
+     */
+    private String sanitizeAddress(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String cleaned = raw.trim();
+        while (cleaned.endsWith(",") || cleaned.endsWith(";")) {
+            cleaned = cleaned.substring(0, cleaned.length() - 1).trim();
+        }
+        return cleaned.isBlank() ? null : cleaned;
+    }
+
+    // ── PDF generation ─────────────────────────────────────────────────────────
+
+    private PdfResult generatePdfIfNeeded(EmailDTO dto) {
+        if (dto.getPurchaseOrderId() == null) {
+            return PdfResult.empty();
+        }
+
+        try {
+            PurchaseOrder order = purchaseOrderRepository
+                    .findByIdWithAllRelations(dto.getPurchaseOrderId())
+                    .orElse(null);
+
+            if (order == null) {
+                log.error("❌ PO not found: id={}", dto.getPurchaseOrderId());
+                return PdfResult.empty();
+            }
+
+            log.info("✅ PO loaded → poNumber={} items={}",
+                    order.getPoNumber(),
+                    order.getItems() != null ? order.getItems().size() : 0);
+
+            return buildPdfResult(order);
+
+        } catch (Exception e) {
+            log.error("❌ PDF generation failed: {}", e.getMessage(), e);
+            return PdfResult.empty();
+        }
+    }
+
+    private PdfResult buildPdfResult(PurchaseOrder order) {
+        byte[] bytes = pdfService.generatePdf(order);
+
+        if (bytes == null || bytes.length == 0) {
+            log.error("❌ PDF generation returned empty");
+            return PdfResult.empty();
+        }
+
+        String name = "PurchaseOrder-" + order.getPoNumber() + ".pdf";
+        log.info("✅ PDF generated → {} bytes", bytes.length);
+        return new PdfResult(bytes, name);
+    }
+
+    // ── Value object to hold PDF bytes + filename ─────────────────────────────
+
+    private record PdfResult(byte[] bytes, String name) {
+
+        static PdfResult empty() {
+            return new PdfResult(null, null);
+        }
+
+        // Override to use Arrays.equals for byte[] content comparison
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof PdfResult other)) return false;
+            return java.util.Arrays.equals(bytes, other.bytes)
+                    && java.util.Objects.equals(name, other.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * java.util.Arrays.hashCode(bytes)
+                    + java.util.Objects.hashCode(name);
+        }
+
+        @Override
+        public String toString() {
+            return "PdfResult{name='" + name + "', bytes="
+                    + (bytes != null ? bytes.length + " bytes" : "null") + "}";
+        }
+    }
+
+    // ── Store Gmail ───────────────────────────────────────────────────────────
 
     private void sendViaStoreConfig(EmailDTO dto, byte[] pdfBytes, String pdfName) {
         StoreMailConfig config = mailConfigRepository
@@ -123,7 +184,15 @@ public class EmailWorker {
                 .orElse(null);
 
         if (config == null) {
-            log.warn("⚠️  No mail config for storeId={} — falling back to global", dto.getStoreId());
+            log.warn("⚠️  No mail config for storeId={} — falling back to global",
+                    dto.getStoreId());
+            sendViaGlobalConfig(dto, pdfBytes, pdfName);
+            return;
+        }
+
+        if (config.getFromEmail() == null || config.getFromEmail().isBlank()) {
+            log.warn("⚠️  Store mail config for storeId={} has blank fromEmail — falling back to global",
+                    dto.getStoreId());
             sendViaGlobalConfig(dto, pdfBytes, pdfName);
             return;
         }
@@ -141,12 +210,19 @@ public class EmailWorker {
                     pdfName != null ? pdfName : "none");
         } catch (Exception e) {
             log.error("❌ Store Gmail send failed: {}", e.getMessage(), e);
+            pushToDeadLetter(dto);
         }
     }
 
-    // ── Global JavaMailSender ─────────────────────────────────────────────
+    // ── Global JavaMailSender ─────────────────────────────────────────────────
 
     private void sendViaGlobalConfig(EmailDTO dto, byte[] pdfBytes, String pdfName) {
+        if (fromEmail == null || fromEmail.isBlank()) {
+            log.error("❌ Global send skipped — app.mail.from is blank. Check environment config.");
+            pushToDeadLetter(dto);
+            return;
+        }
+
         try {
             MimeMessage       message = mailSender.createMimeMessage();
             MimeMessageHelper helper  = new MimeMessageHelper(message, true, "UTF-8");
@@ -169,6 +245,19 @@ public class EmailWorker {
 
         } catch (Exception e) {
             log.error("❌ Global send failed: {}", e.getMessage(), e);
+            pushToDeadLetter(dto);
+        }
+    }
+
+    // ── Dead-letter queue — failed jobs are kept, not lost ────────────────────
+
+    private void pushToDeadLetter(EmailDTO dto) {
+        try {
+            redisTemplate.opsForList().leftPush(EMAIL_QUEUE_FAILED, dto);
+            log.warn("↪️  Job moved to {} → to={} subject={}",
+                    EMAIL_QUEUE_FAILED, dto.getTo(), dto.getSubject());
+        } catch (Exception e) {
+            log.error("❌ Could not push to dead-letter queue: {}", e.getMessage(), e);
         }
     }
 }

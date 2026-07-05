@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.currenciesController;
+package com.sh.sh.pos.system.controller.currenciescontroller;
 
 
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.sh.sh.pos.system.payload.dto.currenciesDTO.CurrencyDTO;
+import com.sh.sh.pos.system.payload.dto.currenciesdto.CurrencyDTO;
 import com.sh.sh.pos.system.payload.request.CurrencyRequestDTO;
-import com.sh.sh.pos.system.service.currenciesService.CurrencyService;
+import com.sh.sh.pos.system.service.currenciesservice.CurrencyService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,15 +1,16 @@
-package com.sh.sh.pos.system.mapper.stockMapper;
+package com.sh.sh.pos.system.mapper.stockmapper;
 
 import java.util.List;
 
 import com.sh.sh.pos.system.model.stocks.StockTransfer;
 import com.sh.sh.pos.system.model.stocks.StockTransferHistory;
 import com.sh.sh.pos.system.model.stocks.StockTransferItem;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockTransferDTO;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockTransferHistoryDTO;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockTransferItemDTO;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockTransferDTO;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockTransferHistoryDTO;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockTransferItemDTO;
 
 public class StockTransferMapper {
+    private StockTransferMapper() {}
      public static StockTransferDTO toDTO(StockTransfer transfer) {
         return StockTransferDTO.builder()
                 .id(transfer.getId())

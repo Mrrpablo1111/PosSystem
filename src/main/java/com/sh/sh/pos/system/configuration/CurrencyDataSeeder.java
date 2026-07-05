@@ -6,7 +6,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import com.sh.sh.pos.system.model.currencies.Currency;
-import com.sh.sh.pos.system.repository.currenciesRepository.CurrencyRepository;
+import com.sh.sh.pos.system.repository.currenciesrepository.CurrencyRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

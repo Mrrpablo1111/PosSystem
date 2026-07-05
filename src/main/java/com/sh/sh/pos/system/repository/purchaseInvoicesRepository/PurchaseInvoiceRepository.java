@@ -1,11 +1,11 @@
-package com.sh.sh.pos.system.repository.purchaseInvoicesRepository;
+package com.sh.sh.pos.system.repository.purchaseinvoicesrepository;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
 
 public interface PurchaseInvoiceRepository extends JpaRepository<PurchaseInvoice, Long> {
 

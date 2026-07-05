@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.repository.priceRepository;
+package com.sh.sh.pos.system.repository.pricerepository;
 
 import java.util.Optional;
 

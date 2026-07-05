@@ -1,11 +1,11 @@
-package com.sh.sh.pos.system.controller.suppliersController;
+package com.sh.sh.pos.system.controller.supplierscontroller;
 
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierLedgerDTO;
-import com.sh.sh.pos.system.service.suppliersService.SupplierLedgerService;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierLedgerDTO;
+import com.sh.sh.pos.system.service.suppliersservice.SupplierLedgerService;
 
 import lombok.RequiredArgsConstructor;
 

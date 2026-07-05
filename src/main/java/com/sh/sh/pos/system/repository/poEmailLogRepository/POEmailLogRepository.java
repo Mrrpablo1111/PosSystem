@@ -1,13 +1,11 @@
-package com.sh.sh.pos.system.repository.poEmailLogRepository;
+package com.sh.sh.pos.system.repository.poemaillogrepository;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-import com.sh.sh.pos.system.model.poEmailLogs.POEmailLog;
+import com.sh.sh.pos.system.model.poemaillogs.POEmailLog;
 
-@Repository
 public interface POEmailLogRepository extends JpaRepository<POEmailLog, Long> {
  
     /** All email history for a single PO — shown in the PO detail drawer */

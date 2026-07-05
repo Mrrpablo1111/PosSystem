@@ -1,48 +1,48 @@
 package com.sh.sh.pos.system.util;
 
-import java.nio.file.AccessDeniedException;
-
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sh.sh.pos.system.domain.UserRole;
-import com.sh.sh.pos.system.exceptions.UserException;
-import com.sh.sh.pos.system.model.Branch;
-import com.sh.sh.pos.system.model.Inventory;
-import com.sh.sh.pos.system.model.Store;
-import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.model.branch.Branch;
+import com.sh.sh.pos.system.model.inventory.Inventory;
 import com.sh.sh.pos.system.model.products.Product;
-import com.sh.sh.pos.system.service.UserService;
+import com.sh.sh.pos.system.model.store.Store;
+import com.sh.sh.pos.system.model.user.User;
+import com.sh.sh.pos.system.service.userservice.UserService;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SecurityUtil {
 
-    private UserService userService;
+    private final UserService userService;
 
-    public void checkAuthority(Store store) throws AccessDeniedException, UserException{
+    public void checkAuthority(Store store) {
         User user = userService.getCurrentUser();
-        if(user.getRole() != UserRole.ROLE_BRANCH_MANAGER){
-            throw new AccessDeniedException("Only Store manager can perform action");
+
+        boolean isStoreLevelRole = user.getRole() == UserRole.ROLE_STORE_ADMIN
+                || user.getRole() == UserRole.ROLE_STORE_MANAGER
+                || user.getRole() == UserRole.ROLE_BRANCH_MANAGER;
+
+        if (!isStoreLevelRole) {
+            throw new AccessDeniedException("Your role is not permitted to perform this action");
         }
-        if(user.getStore() == null || !user.getStore().getId().equals(store.getId())){
-            throw new AccessDeniedException("you are authorized to manage this store.");
+        if (user.getStore() == null || !user.getStore().getId().equals(store.getId())) {
+            throw new AccessDeniedException("You are not authorized to manage this store");
         }
     }
 
-    public void checkAuthority(Branch branch) throws AccessDeniedException, UserException{
+    public void checkAuthority(Branch branch) {
         checkAuthority(branch.getStore());
     }
 
-    public void checkAuthority(Inventory inventory) throws AccessDeniedException, UserException{
+    public void checkAuthority(Inventory inventory) {
         checkAuthority(inventory.getBranch());
     }
 
-    public void checkAuthority(Product product) throws AccessDeniedException, UserException{
+    public void checkAuthority(Product product) {
         checkAuthority(product.getStore());
     }
-
-
-    
 }

@@ -1,9 +1,11 @@
-package com.sh.sh.pos.system.mapper.suppliersMapper;
+package com.sh.sh.pos.system.mapper.suppliersmapper;
 
 import com.sh.sh.pos.system.model.suppliers.Supplier;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierDTO;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierDTO;
 
 public class SupplierMapper {
+    private SupplierMapper() {
+    }
 
     public static SupplierDTO toDTO(Supplier s) {
 

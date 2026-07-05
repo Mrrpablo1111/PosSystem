@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.exchangiesRateController;
+package com.sh.sh.pos.system.controller.exchangiesratecontroller;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sh.sh.pos.system.payload.dto.exchangiesRateDTO.ExchangeRateDTO;
-import com.sh.sh.pos.system.service.exchangiesRateService.ExchangeRateService;
+import com.sh.sh.pos.system.payload.dto.exchangiesratedto.ExchangeRateDTO;
+import com.sh.sh.pos.system.service.exchangiesrateservice.ExchangeRateService;
 
 import lombok.RequiredArgsConstructor;
 

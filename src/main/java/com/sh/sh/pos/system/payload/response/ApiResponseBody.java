@@ -1,6 +1,5 @@
 package com.sh.sh.pos.system.payload.response;
 
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,6 +15,7 @@ import lombok.Data;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponseBody<T> {
+    private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX");
     private boolean success;
     private String message;
 
@@ -24,19 +24,22 @@ public class ApiResponseBody<T> {
     private String timestamp;
     private final T data;
 
-    public ApiResponseBody(boolean success, String message, InternalCodeEnum internalCodeEnum, T data) {
+    public ApiResponseBody(boolean success, String message, InternalCodeEnum internalCode, T data) {
         this.success = success;
         this.message = message;
-        this.timestamp = LocalDateTime.now().toString();
+        this.internalCode = internalCode;
+        this.timestamp = currentTimestamp();
         this.data = data;
     }
 
-    public ApiResponseBody(boolean success, String message, T data){
+    public ApiResponseBody(boolean success, String message, T data) {
         this.success = success;
         this.message = message;
-        this.timestamp = ZonedDateTime.now(ZoneOffset.UTC)
-        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ssXXX"));
+        this.timestamp = currentTimestamp();
         this.data = data;
     }
 
+    private static String currentTimestamp() {
+        return ZonedDateTime.now(ZoneOffset.UTC).format(TIMESTAMP_FORMAT);
+    }
 }

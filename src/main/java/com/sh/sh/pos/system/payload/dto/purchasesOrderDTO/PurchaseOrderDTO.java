@@ -1,13 +1,13 @@
-package com.sh.sh.pos.system.payload.dto.purchasesOrderDTO;
+package com.sh.sh.pos.system.payload.dto.purchasesorderdto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.currenciesDTO.CurrencyDTO;
-import com.sh.sh.pos.system.payload.dto.purchaseInvoicesDTO.PurchaseInvoiceSummaryDTO;
-import com.sh.sh.pos.system.payload.dto.purchasesOrderItemDTO.PurchaseOrderItemDTO;
+import com.sh.sh.pos.system.payload.dto.currenciesdto.CurrencyDTO;
+import com.sh.sh.pos.system.payload.dto.purchaseinvoicesdto.PurchaseInvoiceSummaryDTO;
+import com.sh.sh.pos.system.payload.dto.purchasesorderitemdto.PurchaseOrderItemDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

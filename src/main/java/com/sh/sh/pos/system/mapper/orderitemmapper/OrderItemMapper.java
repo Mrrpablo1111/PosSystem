@@ -1,0 +1,24 @@
+package com.sh.sh.pos.system.mapper.orderitemmapper;
+
+import com.sh.sh.pos.system.mapper.productmapper.ProductMapper;
+import com.sh.sh.pos.system.model.orderitem.OrderItem;
+import com.sh.sh.pos.system.payload.dto.orderitemdto.OrderItemDTO;
+
+public class OrderItemMapper {
+	private OrderItemMapper() {}
+	public static OrderItemDTO toDTO(OrderItem item) {
+		
+		if(item == null) return null;
+		
+		return OrderItemDTO.builder()
+				.id(item.getId())
+				.productId(item.getProduct().getId())
+				.quantity(item.getQuantity())
+				.price(item.getPrice())
+				.product(ProductMapper.toDTO(item.getProduct()))
+				.build();
+		
+		
+	}
+
+}

@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl.stockServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.stockserviceimpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,22 +11,21 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sh.sh.pos.system.domain.ReferenceType;
 import com.sh.sh.pos.system.domain.StockMovementType;
 import com.sh.sh.pos.system.domain.StockTransferStatus;
-import com.sh.sh.pos.system.mapper.stockMapper.StockTransferMapper;
-import com.sh.sh.pos.system.model.Branch;
-import com.sh.sh.pos.system.model.StockMovement;
-
-import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.mapper.stockmapper.StockTransferMapper;
+import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.products.ProductBatch;
+import com.sh.sh.pos.system.model.stockmovement.StockMovement;
 import com.sh.sh.pos.system.model.stocks.StockTransfer;
 import com.sh.sh.pos.system.model.stocks.StockTransferHistory;
 import com.sh.sh.pos.system.model.stocks.StockTransferItem;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockTransferDTO;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockTransferItemDTO;
-import com.sh.sh.pos.system.repository.BranchRepository;
-import com.sh.sh.pos.system.repository.ProductBatchRepository;
-import com.sh.sh.pos.system.repository.StockMovementRepository;
-import com.sh.sh.pos.system.repository.stockRepository.StockTransferRepository;
-import com.sh.sh.pos.system.service.stockService.StockTransferService;
+import com.sh.sh.pos.system.model.user.User;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockTransferDTO;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockTransferItemDTO;
+import com.sh.sh.pos.system.repository.branchrepository.BranchRepository;
+import com.sh.sh.pos.system.repository.productbatchrepository.ProductBatchRepository;
+import com.sh.sh.pos.system.repository.stockmovementrepository.StockMovementRepository;
+import com.sh.sh.pos.system.repository.stockrepository.StockTransferRepository;
+import com.sh.sh.pos.system.service.stockservice.StockTransferService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

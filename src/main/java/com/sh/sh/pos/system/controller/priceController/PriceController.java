@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.priceController;
+package com.sh.sh.pos.system.controller.pricecontroller;
 
 import java.math.BigDecimal;
 
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sh.sh.pos.system.service.priceService.PriceService;
+import com.sh.sh.pos.system.service.priceservice.PriceService;
 
 import lombok.RequiredArgsConstructor;
 

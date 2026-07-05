@@ -1,10 +1,10 @@
-package com.sh.sh.pos.system.model.purchasesOrderItem;
+package com.sh.sh.pos.system.model.purchasesorderitem;
 
 import java.math.BigDecimal;
 
 import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.model.products.ProductVariant;
-import com.sh.sh.pos.system.model.purchasesOrder.PurchaseOrder;
+import com.sh.sh.pos.system.model.purchasesorder.PurchaseOrder;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

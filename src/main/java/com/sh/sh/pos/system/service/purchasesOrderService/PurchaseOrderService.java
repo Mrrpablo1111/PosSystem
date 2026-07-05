@@ -1,8 +1,8 @@
-package com.sh.sh.pos.system.service.purchasesOrderService;
+package com.sh.sh.pos.system.service.purchasesorderservice;
 
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.purchasesOrderDTO.PurchaseOrderDTO;
+import com.sh.sh.pos.system.payload.dto.purchasesorderdto.PurchaseOrderDTO;
 import com.sh.sh.pos.system.payload.request.CreatePurchaseOrderRequest;
 import com.sh.sh.pos.system.payload.request.ReceiveGoodsRequestDTO;
 import com.sh.sh.pos.system.payload.request.UpdateTrackingRequestDTO;

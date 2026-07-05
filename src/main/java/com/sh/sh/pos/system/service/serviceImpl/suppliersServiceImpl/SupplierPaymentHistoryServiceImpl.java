@@ -1,13 +1,13 @@
-package com.sh.sh.pos.system.service.serviceImpl.suppliersServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.suppliersserviceimpl;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.sh.sh.pos.system.mapper.suppliersMapper.SupplierPaymentHistoryMapper;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierPaymentHistoryDTO;
-import com.sh.sh.pos.system.repository.suppliersRepository.SupplierPaymentRepository;
-import com.sh.sh.pos.system.service.suppliersService.SupplierPaymentHistoryService;
+import com.sh.sh.pos.system.mapper.suppliersmapper.SupplierPaymentHistoryMapper;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierPaymentHistoryDTO;
+import com.sh.sh.pos.system.repository.suppliersrepository.SupplierPaymentRepository;
+import com.sh.sh.pos.system.service.suppliersservice.SupplierPaymentHistoryService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -3,7 +3,7 @@ package com.sh.sh.pos.system.model.stocks;
 import java.time.LocalDateTime;
 
 import com.sh.sh.pos.system.domain.StockTransferStatus;
-import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.model.user.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

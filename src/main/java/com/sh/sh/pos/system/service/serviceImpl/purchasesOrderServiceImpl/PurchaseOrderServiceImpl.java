@@ -1,39 +1,38 @@
-package com.sh.sh.pos.system.service.serviceImpl.purchasesOrderServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.purchasesorderserviceimpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.PurchaseOrderStatus;
-import com.sh.sh.pos.system.mapper.purchasesOrderMapper.PurchaseOrderMapper;
-import com.sh.sh.pos.system.model.Branch;
+import com.sh.sh.pos.system.mapper.purchasesordermapper.PurchaseOrderMapper;
+import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.currencies.Currency;
 import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.model.products.ProductVariant;
-import com.sh.sh.pos.system.model.purchasesOrder.PurchaseOrder;
-import com.sh.sh.pos.system.model.purchasesOrderItem.PurchaseOrderItem;
+import com.sh.sh.pos.system.model.purchasesorder.PurchaseOrder;
+import com.sh.sh.pos.system.model.purchasesorderitem.PurchaseOrderItem;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
-import com.sh.sh.pos.system.payload.dto.purchasesOrderDTO.PurchaseOrderDTO;
+import com.sh.sh.pos.system.payload.dto.purchasesorderdto.PurchaseOrderDTO;
 import com.sh.sh.pos.system.payload.request.CreatePurchaseOrderRequest;
 import com.sh.sh.pos.system.payload.request.CreatePurchaseOrderRequest.PurchaseOrderItemRequest;
 
 import com.sh.sh.pos.system.payload.request.ReceiveGoodsRequestDTO;
 
 import com.sh.sh.pos.system.payload.request.UpdateTrackingRequestDTO;
-import com.sh.sh.pos.system.repository.BranchRepository;
-
-import com.sh.sh.pos.system.repository.ProductRepository;
-import com.sh.sh.pos.system.repository.ProductVariantRepository;
-import com.sh.sh.pos.system.repository.currenciesRepository.CurrencyRepository;
-import com.sh.sh.pos.system.repository.purchasesOrderRepository.PurchaseOrderRepository;
-import com.sh.sh.pos.system.repository.suppliersRepository.SupplierRepository;
-import com.sh.sh.pos.system.service.EmailService;
-import com.sh.sh.pos.system.service.purchasesOrderService.PurchaseOrderService;
+import com.sh.sh.pos.system.repository.branchrepository.BranchRepository;
+import com.sh.sh.pos.system.repository.currenciesrepository.CurrencyRepository;
+import com.sh.sh.pos.system.repository.productrepository.ProductRepository;
+import com.sh.sh.pos.system.repository.productvariantrepository.ProductVariantRepository;
+import com.sh.sh.pos.system.repository.purchasesorderrepository.PurchaseOrderRepository;
+import com.sh.sh.pos.system.repository.suppliersrepository.SupplierRepository;
+import com.sh.sh.pos.system.service.emailservice.EmailService;
+import com.sh.sh.pos.system.service.purchasesorderservice.PurchaseOrderService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +59,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 return purchaseOrderRepository.findByBranchStoreId(storeId)
                                 .stream()
                                 .map(mapper::toDTO)
-                                .collect(Collectors.toList());
+                                .toList();
         }
 
         @Override
@@ -68,7 +67,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 return purchaseOrderRepository.findAll()
                                 .stream()
                                 .map(mapper::toDTO)
-                                .collect(Collectors.toList());
+                                .toList();
         }
 
         @Override
@@ -93,7 +92,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
                 List<PurchaseOrderItem> items = req.getItems().stream()
                                 .map(this::toOrderItem)
-                                .collect(Collectors.toList());
+                                .toList();
 
                 PurchaseOrder order = mapper.toEntity(req, supplier, branch, currency, items);
 

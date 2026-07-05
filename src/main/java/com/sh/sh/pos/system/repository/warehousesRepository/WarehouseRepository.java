@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.repository.warehousesRepository;
+package com.sh.sh.pos.system.repository.warehousesrepository;
 
 import java.util.List;
 import java.util.Optional;

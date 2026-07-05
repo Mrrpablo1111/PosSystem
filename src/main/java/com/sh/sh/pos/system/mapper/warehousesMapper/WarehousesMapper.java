@@ -1,12 +1,13 @@
-package com.sh.sh.pos.system.mapper.warehousesMapper;
+package com.sh.sh.pos.system.mapper.warehousesmapper;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import com.sh.sh.pos.system.model.warehouses.Warehouse;
-import com.sh.sh.pos.system.payload.dto.warehousesDTO.WarehouseDTO;
+import com.sh.sh.pos.system.payload.dto.warehousesdto.WarehouseDTO;
 
 public class WarehousesMapper {
+    private WarehousesMapper() {}
     public static WarehouseDTO toDTO(Warehouse warehouse){
         if(warehouse == null) return null;
         return WarehouseDTO.builder()
@@ -24,6 +25,6 @@ public class WarehousesMapper {
     public static List<WarehouseDTO> toDTOList(List<Warehouse> warehouses){
         return warehouses.stream()
                 .map(WarehousesMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

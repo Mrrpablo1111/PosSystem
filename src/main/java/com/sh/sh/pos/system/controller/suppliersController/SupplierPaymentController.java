@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.suppliersController;
+package com.sh.sh.pos.system.controller.supplierscontroller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierPaymentDTO;
-import com.sh.sh.pos.system.service.suppliersService.SupplierPaymentService;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierPaymentDTO;
+import com.sh.sh.pos.system.service.suppliersservice.SupplierPaymentService;
 
 import lombok.RequiredArgsConstructor;
 

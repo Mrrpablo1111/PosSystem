@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.poEmailLogs;
+package com.sh.sh.pos.system.payload.dto.poemaillogs;
 
 import java.time.LocalDateTime;
 

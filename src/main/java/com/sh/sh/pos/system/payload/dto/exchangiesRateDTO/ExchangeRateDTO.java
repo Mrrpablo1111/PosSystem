@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.exchangiesRateDTO;
+package com.sh.sh.pos.system.payload.dto.exchangiesratedto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

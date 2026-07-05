@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.stockDTO;
+package com.sh.sh.pos.system.payload.dto.stockdto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sh.sh.pos.system.model.session.UserSession;
-import com.sh.sh.pos.system.payload.dto.EmailDTO;
+import com.sh.sh.pos.system.payload.dto.emaildto.EmailDTO;
 
 @Configuration
 public class RedisConfig {

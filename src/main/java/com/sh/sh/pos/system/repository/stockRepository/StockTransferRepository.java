@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.repository.stockRepository;
+package com.sh.sh.pos.system.repository.stockrepository;
 
 import java.util.List;
 
@@ -8,11 +8,11 @@ import com.sh.sh.pos.system.domain.StockTransferStatus;
 import com.sh.sh.pos.system.model.stocks.StockTransfer;
 
 public interface StockTransferRepository extends JpaRepository<StockTransfer, Long> {
-    List<StockTransfer> findByFromBranch_Id(Long branchId);
+    List<StockTransfer> findByFromBranchId(Long branchId);
 
-    List<StockTransfer> findByToBranch_Id(Long branchId);
+    List<StockTransfer> findByToBranchId(Long branchId);
 
     List<StockTransfer> findByStatus(StockTransferStatus status);
 
-    List<StockTransfer> findByRequest_Id(Long requestId);
+    List<StockTransfer> findByRequestId(Long requestId);
 }

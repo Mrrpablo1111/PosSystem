@@ -1,12 +1,11 @@
-package com.sh.sh.pos.system.service.RedisService;
+package com.sh.sh.pos.system.service.redisservice;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -131,6 +130,6 @@ public class RefreshTokenRedisService {
         return keys.stream()
                 .map(key -> redisTemplate.opsForValue().get(key))
                 .filter(session -> session != null)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

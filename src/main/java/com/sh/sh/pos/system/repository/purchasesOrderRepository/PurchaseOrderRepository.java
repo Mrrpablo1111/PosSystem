@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.repository.purchasesOrderRepository;
+package com.sh.sh.pos.system.repository.purchasesorderrepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sh.sh.pos.system.domain.PurchaseOrderStatus;
-import com.sh.sh.pos.system.model.purchasesOrder.PurchaseOrder;
+import com.sh.sh.pos.system.model.purchasesorder.PurchaseOrder;
 
 public interface PurchaseOrderRepository
         extends JpaRepository<PurchaseOrder, Long> {

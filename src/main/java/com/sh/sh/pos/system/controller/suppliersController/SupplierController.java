@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.suppliersController;
+package com.sh.sh.pos.system.controller.supplierscontroller;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierDTO;
-import com.sh.sh.pos.system.service.suppliersService.SupplierService;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierDTO;
+import com.sh.sh.pos.system.service.suppliersservice.SupplierService;
 
 import lombok.RequiredArgsConstructor;
 

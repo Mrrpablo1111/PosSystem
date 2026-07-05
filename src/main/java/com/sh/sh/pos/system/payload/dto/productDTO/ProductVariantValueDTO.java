@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.productDTO;
+package com.sh.sh.pos.system.payload.dto.productdto;
 
 import lombok.Data;
 

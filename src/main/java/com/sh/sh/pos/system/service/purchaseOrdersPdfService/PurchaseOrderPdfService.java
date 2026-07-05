@@ -1,6 +1,6 @@
-package com.sh.sh.pos.system.service.purchaseOrdersPdfService;
+package com.sh.sh.pos.system.service.purchaseorderspdfservice;
 
-import com.sh.sh.pos.system.model.purchasesOrder.PurchaseOrder;
+import com.sh.sh.pos.system.model.purchasesorder.PurchaseOrder;
 
 public interface PurchaseOrderPdfService {
  

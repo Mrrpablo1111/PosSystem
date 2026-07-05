@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.priceController;
+package com.sh.sh.pos.system.controller.pricecontroller;
 
 import java.util.List;
 
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sh.sh.pos.system.payload.dto.priceDTO.PriceGroupDTO;
-import com.sh.sh.pos.system.service.priceService.PriceGroupService;
+import com.sh.sh.pos.system.payload.dto.pricedto.PriceGroupDTO;
+import com.sh.sh.pos.system.service.priceservice.PriceGroupService;
 
 import lombok.RequiredArgsConstructor;
 

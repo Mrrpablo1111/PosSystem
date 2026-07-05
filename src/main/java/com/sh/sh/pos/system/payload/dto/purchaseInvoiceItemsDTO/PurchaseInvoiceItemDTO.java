@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.purchaseInvoiceItemsDTO;
+package com.sh.sh.pos.system.payload.dto.purchaseinvoiceitemsdto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

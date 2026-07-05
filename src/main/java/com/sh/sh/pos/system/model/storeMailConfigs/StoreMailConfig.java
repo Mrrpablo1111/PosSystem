@@ -1,5 +1,5 @@
-package com.sh.sh.pos.system.model.storeMailConfigs;
-import com.sh.sh.pos.system.model.Store;
+package com.sh.sh.pos.system.model.storemailconfigs;
+import com.sh.sh.pos.system.model.store.Store;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

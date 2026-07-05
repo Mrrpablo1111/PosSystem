@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.purchasesOrderItemDTO;
+package com.sh.sh.pos.system.payload.dto.purchasesorderitemdto;
 
 import java.math.BigDecimal;
 

@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.repository.currenciesRepository;
+package com.sh.sh.pos.system.repository.currenciesrepository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

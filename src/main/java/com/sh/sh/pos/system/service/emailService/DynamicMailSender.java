@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.emailService;
+package com.sh.sh.pos.system.service.emailservice;
 
 import java.util.Properties;
 
@@ -7,7 +7,8 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import com.sh.sh.pos.system.model.storeMailConfigs.StoreMailConfig;
+import com.sh.sh.pos.system.exception.EmailSendException;
+import com.sh.sh.pos.system.model.storemailconfigs.StoreMailConfig;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -74,7 +75,7 @@ public class DynamicMailSender {
         } catch (Exception e) {
             log.error("❌ sendWithPdf failed from={} to={} error={}",
                     config.getFromEmail(), to, e.getMessage(), e);
-            throw new RuntimeException("Email send failed: " + e.getMessage(), e);
+            throw new EmailSendException("Email send failed: " + e.getMessage(), e);
         }
     }
 
@@ -106,7 +107,7 @@ public class DynamicMailSender {
         } catch (Exception e) {
             log.error("❌ Email failed from={} to={} error={}",
                     config.getFromEmail(), to, e.getMessage(), e);
-            throw new RuntimeException("Email send failed: " + e.getMessage(), e);
+            throw new EmailSendException("Email send failed: " + e.getMessage(), e);
         }
     }
 

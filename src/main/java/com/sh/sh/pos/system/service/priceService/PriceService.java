@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.priceService;
+package com.sh.sh.pos.system.service.priceservice;
 
 import java.math.BigDecimal;
 

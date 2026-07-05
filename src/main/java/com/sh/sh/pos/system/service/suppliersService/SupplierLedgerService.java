@@ -1,7 +1,7 @@
-package com.sh.sh.pos.system.service.suppliersService;
+package com.sh.sh.pos.system.service.suppliersservice;
 
 
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierLedgerDTO;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierLedgerDTO;
 
 public interface SupplierLedgerService {
 

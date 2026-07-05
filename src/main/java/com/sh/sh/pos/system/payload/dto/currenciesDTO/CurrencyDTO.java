@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.currenciesDTO;
+package com.sh.sh.pos.system.payload.dto.currenciesdto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

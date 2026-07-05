@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.purchasesOrderController;
+package com.sh.sh.pos.system.controller.purchasesordercontroller;
 
 import java.util.List;
 
@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sh.sh.pos.system.payload.dto.purchasesOrderDTO.PurchaseOrderDTO;
+import com.sh.sh.pos.system.payload.dto.purchasesorderdto.PurchaseOrderDTO;
 import com.sh.sh.pos.system.payload.request.CreatePurchaseOrderRequest;
 import com.sh.sh.pos.system.payload.request.ReceiveGoodsRequestDTO;
 import com.sh.sh.pos.system.payload.request.UpdateTrackingRequestDTO;
-import com.sh.sh.pos.system.service.purchasesOrderService.PurchaseOrderService;
+import com.sh.sh.pos.system.service.purchasesorderservice.PurchaseOrderService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

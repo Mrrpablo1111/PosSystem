@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.storeMailConfigsController;
+package com.sh.sh.pos.system.controller.storemailconfigscontroller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,15 +8,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
- 
-import com.sh.sh.pos.system.model.Store;
-import com.sh.sh.pos.system.model.storeMailConfigs.StoreMailConfig;
-import com.sh.sh.pos.system.payload.dto.storeMailConfigsDTO.StoreMailConfigDTO;
+
+import com.sh.sh.pos.system.model.store.Store;
+import com.sh.sh.pos.system.model.storemailconfigs.StoreMailConfig;
+import com.sh.sh.pos.system.payload.dto.storemailconfigsdto.StoreMailConfigDTO;
 import com.sh.sh.pos.system.payload.request.StoreMailConfigRequestDTO;
-import com.sh.sh.pos.system.repository.StoreRepository;
-import com.sh.sh.pos.system.repository.storeMailConfigsRepository.StoreMailConfigRepository;
-import com.sh.sh.pos.system.service.emailService.DynamicMailSender;
-import com.sh.sh.pos.system.service.emailService.PasswordEncryptorService;
+import com.sh.sh.pos.system.repository.storemailconfigsrepository.StoreMailConfigRepository;
+import com.sh.sh.pos.system.repository.storerepository.StoreRepository;
+import com.sh.sh.pos.system.service.emailservice.DynamicMailSender;
+import com.sh.sh.pos.system.service.emailservice.PasswordEncryptorService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

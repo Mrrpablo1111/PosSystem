@@ -1,10 +1,10 @@
-package com.sh.sh.pos.system.service.currenciesService;
+package com.sh.sh.pos.system.service.currenciesservice;
 
 
 
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.currenciesDTO.CurrencyDTO;
+import com.sh.sh.pos.system.payload.dto.currenciesdto.CurrencyDTO;
 import com.sh.sh.pos.system.payload.request.CurrencyRequestDTO;
 
 public interface CurrencyService {

@@ -1,10 +1,10 @@
-package com.sh.sh.pos.system.payload.dto.purchaseInvoicesDTO;
+package com.sh.sh.pos.system.payload.dto.purchaseinvoicesdto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.purchaseInvoiceItemsDTO.PurchaseInvoiceItemDTO;
+import com.sh.sh.pos.system.payload.dto.purchaseinvoiceitemsdto.PurchaseInvoiceItemDTO;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

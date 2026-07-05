@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.sh.sh.pos.system.domain.StockTransferStatus;
-import com.sh.sh.pos.system.model.Branch;
-import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.model.branch.Branch;
+import com.sh.sh.pos.system.model.user.User;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;

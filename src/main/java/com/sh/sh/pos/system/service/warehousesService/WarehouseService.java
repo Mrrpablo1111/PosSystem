@@ -1,8 +1,8 @@
-package com.sh.sh.pos.system.service.warehousesService;
+package com.sh.sh.pos.system.service.warehousesservice;
 
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.warehousesDTO.WarehouseDTO;
+import com.sh.sh.pos.system.payload.dto.warehousesdto.WarehouseDTO;
 
 public interface WarehouseService {
 

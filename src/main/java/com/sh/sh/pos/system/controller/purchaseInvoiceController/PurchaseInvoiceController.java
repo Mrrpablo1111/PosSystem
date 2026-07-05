@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.purchaseInvoiceController;
+package com.sh.sh.pos.system.controller.purchaseinvoicecontroller;
 
 
 import java.util.List;
@@ -7,8 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.sh.sh.pos.system.payload.dto.purchaseInvoicesDTO.PurchaseInvoiceDTO;
-import com.sh.sh.pos.system.service.purchaseInvoicesService.PurchaseInvoiceService;
+import com.sh.sh.pos.system.payload.dto.purchaseinvoicesdto.PurchaseInvoiceDTO;
+import com.sh.sh.pos.system.service.purchaseinvoicesservice.PurchaseInvoiceService;
 
 import lombok.RequiredArgsConstructor;
 

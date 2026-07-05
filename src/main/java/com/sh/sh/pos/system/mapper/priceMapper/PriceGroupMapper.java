@@ -1,10 +1,13 @@
-package com.sh.sh.pos.system.mapper.priceMapper;
+package com.sh.sh.pos.system.mapper.pricemapper;
 
 import com.sh.sh.pos.system.model.price.PriceGroup;
-import com.sh.sh.pos.system.payload.dto.priceDTO.PriceGroupDTO;
+import com.sh.sh.pos.system.payload.dto.pricedto.PriceGroupDTO;
 
 public class PriceGroupMapper {
-     public static PriceGroupDTO toDTO(PriceGroup group) {
+    private PriceGroupMapper() {
+    }
+
+    public static PriceGroupDTO toDTO(PriceGroup group) {
         return PriceGroupDTO.builder()
                 .id(group.getId())
                 .name(group.getName())
@@ -19,7 +22,7 @@ public class PriceGroupMapper {
                 .id(dto.getId())
                 .name(dto.getName())
                 .description(dto.getDescription())
-                .active(dto.getActive() != null ? dto.getActive() : true)
+                .active(!Boolean.FALSE.equals(dto.getActive()))
                 .build();
     }
 }

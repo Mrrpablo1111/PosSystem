@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.sh.sh.pos.system.domain.PaymentMethod;
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
 
 import jakarta.persistence.*;
 import lombok.*;

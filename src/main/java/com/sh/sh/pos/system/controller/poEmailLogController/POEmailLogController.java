@@ -1,8 +1,7 @@
-package com.sh.sh.pos.system.controller.poEmailLogController;
+package com.sh.sh.pos.system.controller.poemaillogcontroller;
 
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,9 +9,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sh.sh.pos.system.model.poEmailLogs.POEmailLog;
-import com.sh.sh.pos.system.payload.dto.poEmailLogs.POEmailLogDTO;
-import com.sh.sh.pos.system.repository.poEmailLogRepository.POEmailLogRepository;
+import com.sh.sh.pos.system.model.poemaillogs.POEmailLog;
+import com.sh.sh.pos.system.payload.dto.poemaillogs.POEmailLogDTO;
+import com.sh.sh.pos.system.repository.poemaillogrepository.POEmailLogRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +42,7 @@ public class POEmailLogController {
                 .findByPurchaseOrderIdOrderBySentAtDesc(id)
                 .stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(logs);
     }
@@ -60,7 +59,7 @@ public class POEmailLogController {
                 .findByPurchaseOrderBranchStoreIdOrderBySentAtDesc(storeId)
                 .stream()
                 .map(this::toDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         return ResponseEntity.ok(logs);
     }

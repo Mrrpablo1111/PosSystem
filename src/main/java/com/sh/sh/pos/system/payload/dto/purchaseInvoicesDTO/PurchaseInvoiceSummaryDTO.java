@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.payload.dto.purchaseInvoicesDTO;
+package com.sh.sh.pos.system.payload.dto.purchaseinvoicesdto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl.stockServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.stockserviceimpl;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -7,22 +7,23 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.sh.sh.pos.system.domain.StockRequestStatus;
-import com.sh.sh.pos.system.mapper.stockMapper.StockRequestMapper;
-import com.sh.sh.pos.system.model.Branch;
-import com.sh.sh.pos.system.model.User;
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
+import com.sh.sh.pos.system.exception.UserException;
+import com.sh.sh.pos.system.mapper.stockmapper.StockRequestMapper;
+import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.model.products.ProductVariant;
 import com.sh.sh.pos.system.model.stocks.StockRequest;
 import com.sh.sh.pos.system.model.stocks.StockRequestItem;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockRequestDTO;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockRequestItemDTO;
-import com.sh.sh.pos.system.repository.BranchRepository;
-import com.sh.sh.pos.system.repository.ProductRepository;
-import com.sh.sh.pos.system.repository.ProductVariantRepository;
-import com.sh.sh.pos.system.repository.stockRepository.StockRequestRepository;
-import com.sh.sh.pos.system.service.stockService.StockRequestService;
+import com.sh.sh.pos.system.model.user.User;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockRequestDTO;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockRequestItemDTO;
+import com.sh.sh.pos.system.repository.branchrepository.BranchRepository;
+import com.sh.sh.pos.system.repository.productrepository.ProductRepository;
+import com.sh.sh.pos.system.repository.productvariantrepository.ProductVariantRepository;
+import com.sh.sh.pos.system.repository.stockrepository.StockRequestRepository;
+import com.sh.sh.pos.system.service.stockservice.StockRequestService;
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -34,44 +35,21 @@ public class StockRequestServiceImpl implements StockRequestService {
     private final BranchRepository branchRepository;
     private final ProductRepository productRepository;
     private final ProductVariantRepository variantRepository;
-    private final StockTransferServiceImpl transferService;
 
     @Override
     @Transactional
     public StockRequestDTO create(StockRequestDTO dto, User user) {
-        Branch fromBranch = branchRepository.findById(dto.getFromBranchId())
-                .orElseThrow(() -> new EntityNotFoundException("From branch not found"));
+        Branch fromBranch = findBranchOrThrow(dto.getFromBranchId(), "From");
+        Branch toBranch = findBranchOrThrow(dto.getToBranchId(), "To");
 
-        Branch toBranch = branchRepository.findById(dto.getToBranchId())
-                .orElseThrow(() -> new EntityNotFoundException("To branch not found"));
+        if (fromBranch.getId().equals(toBranch.getId())) {
+            throw new UserException("From and To branches must be different");
+        }
 
         StockRequest request = StockRequestMapper.toEntity(dto, fromBranch, toBranch);
         request.setRequestedBy(user);
         request.setStatus(StockRequestStatus.PENDING);
-
-        List<StockRequestItem> items = new ArrayList<>();
-
-        if (dto.getItems() != null) {
-            for (StockRequestItemDTO itemDTO : dto.getItems()) {
-                Product product = productRepository.findById(itemDTO.getProductId())
-                        .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-                ProductVariant variant = null;
-                if (itemDTO.getVariantId() != null) {
-                    variant = variantRepository.findById(itemDTO.getVariantId())
-                            .orElseThrow(() -> new EntityNotFoundException("Variant not found"));
-                }
-
-                items.add(StockRequestItem.builder()
-                        .request(request)
-                        .product(product)
-                        .variant(variant)
-                        .quantity(itemDTO.getQuantity())
-                        .build());
-            }
-        }
-
-        request.setItems(items);
+        request.setItems(buildItems(dto.getItems(), request));
 
         return StockRequestMapper.toDTO(requestRepository.save(request));
     }
@@ -79,8 +57,7 @@ public class StockRequestServiceImpl implements StockRequestService {
     @Override
     @Transactional
     public StockRequestDTO approve(Long id, User user) {
-        StockRequest request = requestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Request not found"));
+        StockRequest request = findRequestOrThrow(id);
 
         request.setStatus(StockRequestStatus.APPROVED);
         request.setApprovedBy(user);
@@ -92,8 +69,7 @@ public class StockRequestServiceImpl implements StockRequestService {
     @Override
     @Transactional
     public StockRequestDTO reject(Long id, User user) {
-        StockRequest request = requestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Request not found"));
+        StockRequest request = findRequestOrThrow(id);
 
         request.setStatus(StockRequestStatus.REJECTED);
 
@@ -102,9 +78,7 @@ public class StockRequestServiceImpl implements StockRequestService {
 
     @Override
     public StockRequestDTO get(Long id) {
-        return requestRepository.findById(id)
-                .map(StockRequestMapper::toDTO)
-                .orElseThrow(() -> new EntityNotFoundException("Request not found"));
+        return StockRequestMapper.toDTO(findRequestOrThrow(id));
     }
 
     @Override
@@ -126,17 +100,56 @@ public class StockRequestServiceImpl implements StockRequestService {
     @Override
     @Transactional
     public StockRequestDTO convertToTransfer(Long requestId, User user) {
-        StockRequest request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("Request not found"));
+        StockRequest request = findRequestOrThrow(requestId);
 
         if (request.getStatus() != StockRequestStatus.APPROVED) {
-            throw new IllegalArgumentException("Only approved request can be converted to transfer");
+            throw new UserException("Only approved requests can be converted to transfer");
         }
 
         request.setStatus(StockRequestStatus.CONVERTED_TO_TRANSFER);
 
         return StockRequestMapper.toDTO(requestRepository.save(request));
-
     }
 
+    // ── Helpers ───────────────────────────────────────────────────────────
+
+    private StockRequest findRequestOrThrow(Long id) {
+        return requestRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Stock request not found with id: " + id));
+    }
+
+    private Branch findBranchOrThrow(Long id, String label) {
+        return branchRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        label + " branch not found with id: " + id));
+    }
+
+    private List<StockRequestItem> buildItems(List<StockRequestItemDTO> itemDTOs, StockRequest request) {
+        List<StockRequestItem> items = new ArrayList<>();
+        if (itemDTOs == null) {
+            return items;
+        }
+
+        for (StockRequestItemDTO itemDTO : itemDTOs) {
+            Product product = productRepository.findById(itemDTO.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Product not found with id: " + itemDTO.getProductId()));
+
+            ProductVariant variant = null;
+            if (itemDTO.getVariantId() != null) {
+                variant = variantRepository.findById(itemDTO.getVariantId())
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Variant not found with id: " + itemDTO.getVariantId()));
+            }
+
+            items.add(StockRequestItem.builder()
+                    .request(request)
+                    .product(product)
+                    .variant(variant)
+                    .quantity(itemDTO.getQuantity())
+                    .build());
+        }
+        return items;
+    }
 }

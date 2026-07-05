@@ -1,8 +1,8 @@
-package com.sh.sh.pos.system.service.exchangiesRateService;
+package com.sh.sh.pos.system.service.exchangiesrateservice;
 
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.exchangiesRateDTO.ExchangeRateDTO;
+import com.sh.sh.pos.system.payload.dto.exchangiesratedto.ExchangeRateDTO;
 
 public interface ExchangeRateService {
 

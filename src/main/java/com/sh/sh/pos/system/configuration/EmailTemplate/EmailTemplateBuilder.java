@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.configuration.EmailTemplate;
+package com.sh.sh.pos.system.configuration.emailtemplate;
 
 import org.springframework.stereotype.Component;
 

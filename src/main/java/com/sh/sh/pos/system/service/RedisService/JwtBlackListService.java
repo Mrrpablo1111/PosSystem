@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.RedisService;
+package com.sh.sh.pos.system.service.redisservice;
 
 import java.util.concurrent.TimeUnit;
 

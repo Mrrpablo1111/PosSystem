@@ -1,10 +1,10 @@
-package com.sh.sh.pos.system.model.poEmailLogs;
+package com.sh.sh.pos.system.model.poemaillogs;
 
 
 import java.time.LocalDateTime;
 
 import com.sh.sh.pos.system.domain.EmailType;
-import com.sh.sh.pos.system.model.purchasesOrder.PurchaseOrder;
+import com.sh.sh.pos.system.model.purchasesorder.PurchaseOrder;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

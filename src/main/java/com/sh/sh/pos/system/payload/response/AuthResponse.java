@@ -1,7 +1,7 @@
 package com.sh.sh.pos.system.payload.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sh.sh.pos.system.payload.dto.UserDTO;
+import com.sh.sh.pos.system.payload.dto.userdto.UserDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

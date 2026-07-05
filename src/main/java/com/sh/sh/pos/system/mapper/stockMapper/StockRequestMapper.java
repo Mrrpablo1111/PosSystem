@@ -1,14 +1,15 @@
-package com.sh.sh.pos.system.mapper.stockMapper;
+package com.sh.sh.pos.system.mapper.stockmapper;
 
 import java.util.List;
 
-import com.sh.sh.pos.system.model.Branch;
+import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.stocks.StockRequest;
 import com.sh.sh.pos.system.model.stocks.StockRequestItem;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockRequestDTO;
-import com.sh.sh.pos.system.payload.dto.stockDTO.StockRequestItemDTO;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockRequestDTO;
+import com.sh.sh.pos.system.payload.dto.stockdto.StockRequestItemDTO;
 
 public class StockRequestMapper {
+    private StockRequestMapper() {}
     public static StockRequestDTO toDTO(StockRequest request) {
         return StockRequestDTO.builder()
                 .id(request.getId())

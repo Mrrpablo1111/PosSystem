@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.sh.sh.pos.system.domain.SupplierStatus;
-import com.sh.sh.pos.system.model.Store;
+import com.sh.sh.pos.system.model.store.Store;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

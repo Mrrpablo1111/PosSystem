@@ -1,12 +1,12 @@
-package com.sh.sh.pos.system.mapper.suppliersMapper;
+package com.sh.sh.pos.system.mapper.suppliersmapper;
 
 
 
 import com.sh.sh.pos.system.model.suppliers.SupplierPayment;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierPaymentHistoryDTO;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierPaymentHistoryDTO;
 
 public class SupplierPaymentHistoryMapper {
-
+    private SupplierPaymentHistoryMapper() {}
     public static SupplierPaymentHistoryDTO toDTO(
             SupplierPayment payment) {
 

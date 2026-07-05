@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.model.exchangiesRate;
+package com.sh.sh.pos.system.model.exchangiesrate;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

@@ -1,8 +1,8 @@
-package com.sh.sh.pos.system.service.suppliersService;
+package com.sh.sh.pos.system.service.suppliersservice;
 
 import java.util.List;
 
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierDTO;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierDTO;
 
 public interface SupplierService {
 

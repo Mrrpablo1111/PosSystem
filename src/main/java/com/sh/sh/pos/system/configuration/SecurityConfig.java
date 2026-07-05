@@ -47,8 +47,9 @@ public class SecurityConfig {
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(PUBLIC_URLS).permitAll()
-                                                .requestMatchers("/api/**").authenticated()
                                                 .requestMatchers("/api/super-admin/**").hasRole("ADMIN")
+                                                .requestMatchers("/api/**").authenticated()
+                                                
                                                 .anyRequest().permitAll())
                                 .addFilterBefore(new JwtValidator(),
                                                 BasicAuthenticationFilter.class)

@@ -29,13 +29,25 @@ public enum InternalCodeEnum {
     BOOKING_MANAGEMENT_CODE_003(3, "Booking Modification is now confirmed", OK),
     BOOKING_MANAGEMENT_CODE_004(4, "Booking Modification is now rejected", OK);
 
-    private final String codeDescription;
     private final String codeNumber;
-    private  final HttpStatus httpStatus;
+    private final String codeDescription;
+    private final HttpStatus httpStatus;
 
-    InternalCodeEnum(int codeNumber, String codeDescription, HttpStatus status){
-        this.codeNumber = String.format("%03d",codeDescription);
-        this.codeDescription= codeDescription;
-        httpStatus = status;
+    InternalCodeEnum(int codeNumber, String codeDescription, HttpStatus status) {
+        this.codeNumber = String.format("%03d", codeNumber); // ← fix
+        this.codeDescription = codeDescription;
+        this.httpStatus = status;
+    }
+
+    public String getCodeNumber() {
+        return codeNumber;
+    }
+
+    public String getCodeDescription() {
+        return codeDescription;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 }

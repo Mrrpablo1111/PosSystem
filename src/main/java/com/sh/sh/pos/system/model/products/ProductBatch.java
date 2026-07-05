@@ -8,8 +8,7 @@ import java.time.temporal.ChronoUnit;
 
 
 import com.sh.sh.pos.system.domain.ExpiryStatus;
-import com.sh.sh.pos.system.model.Branch;
-
+import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
 
 import jakarta.persistence.Column;

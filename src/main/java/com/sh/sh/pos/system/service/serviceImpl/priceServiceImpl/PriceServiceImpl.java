@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl.priceServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.priceserviceimpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -6,16 +6,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.sh.sh.pos.system.model.Customer;
+import com.sh.sh.pos.system.model.customer.Customer;
 import com.sh.sh.pos.system.model.price.PriceGroup;
 import com.sh.sh.pos.system.model.price.PriceRule;
 import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.model.products.ProductVariant;
-import com.sh.sh.pos.system.repository.CustomerRepository;
-import com.sh.sh.pos.system.repository.ProductRepository;
-import com.sh.sh.pos.system.repository.ProductVariantRepository;
-import com.sh.sh.pos.system.repository.priceRepository.PriceRuleRepository;
-import com.sh.sh.pos.system.service.priceService.PriceService;
+import com.sh.sh.pos.system.repository.customerrepository.CustomerRepository;
+import com.sh.sh.pos.system.repository.pricerepository.PriceRuleRepository;
+import com.sh.sh.pos.system.repository.productrepository.ProductRepository;
+import com.sh.sh.pos.system.repository.productvariantrepository.ProductVariantRepository;
+import com.sh.sh.pos.system.service.priceservice.PriceService;
 
 import jakarta.persistence.EntityNotFoundException;
 

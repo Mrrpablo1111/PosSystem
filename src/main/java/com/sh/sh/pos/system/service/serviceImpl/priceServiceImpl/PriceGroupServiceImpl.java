@@ -1,40 +1,41 @@
-package com.sh.sh.pos.system.service.serviceImpl.priceServiceImpl;
-
-
+package com.sh.sh.pos.system.service.serviceimpl.priceserviceimpl;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.sh.sh.pos.system.mapper.priceMapper.PriceGroupMapper;
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
+import com.sh.sh.pos.system.exception.UserException;
+import com.sh.sh.pos.system.mapper.pricemapper.PriceGroupMapper;
 import com.sh.sh.pos.system.model.price.PriceGroup;
-import com.sh.sh.pos.system.payload.dto.priceDTO.PriceGroupDTO;
-import com.sh.sh.pos.system.repository.priceRepository.PriceGroupRepository;
-import com.sh.sh.pos.system.service.priceService.PriceGroupService;
+import com.sh.sh.pos.system.payload.dto.pricedto.PriceGroupDTO;
+import com.sh.sh.pos.system.repository.pricerepository.PriceGroupRepository;
+import com.sh.sh.pos.system.service.priceservice.PriceGroupService;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class PriceGroupServiceImpl implements PriceGroupService{
+public class PriceGroupServiceImpl implements PriceGroupService {
+
     private final PriceGroupRepository priceGroupRepository;
 
     @Override
+    @Transactional
     public PriceGroupDTO create(PriceGroupDTO dto) {
         if (priceGroupRepository.existsByNameIgnoreCase(dto.getName())) {
-            throw new IllegalArgumentException("Price group already exists");
+            throw new UserException("Price group already exists: " + dto.getName());
         }
 
         return PriceGroupMapper.toDTO(
-                priceGroupRepository.save(PriceGroupMapper.toEntity(dto))
-        );
+                priceGroupRepository.save(PriceGroupMapper.toEntity(dto)));
     }
 
     @Override
+    @Transactional
     public PriceGroupDTO update(Long id, PriceGroupDTO dto) {
-        PriceGroup group = priceGroupRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Price group not found"));
+        PriceGroup group = findPriceGroupOrThrow(id);
 
         group.setName(dto.getName());
         group.setDescription(dto.getDescription());
@@ -47,13 +48,13 @@ public class PriceGroupServiceImpl implements PriceGroupService{
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PriceGroupDTO get(Long id) {
-        return priceGroupRepository.findById(id)
-                .map(PriceGroupMapper::toDTO)
-                .orElseThrow(() -> new EntityNotFoundException("Price group not found"));
+        return PriceGroupMapper.toDTO(findPriceGroupOrThrow(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PriceGroupDTO> getAll() {
         return priceGroupRepository.findAll()
                 .stream()
@@ -62,11 +63,16 @@ public class PriceGroupServiceImpl implements PriceGroupService{
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-        PriceGroup group = priceGroupRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Price group not found"));
-
-        priceGroupRepository.delete(group);
+        priceGroupRepository.delete(findPriceGroupOrThrow(id));
     }
-    
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+
+    private PriceGroup findPriceGroupOrThrow(Long id) {
+        return priceGroupRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Price group not found with id: " + id));
+    }
 }

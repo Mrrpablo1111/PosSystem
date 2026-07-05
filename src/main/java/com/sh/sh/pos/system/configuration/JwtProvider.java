@@ -3,9 +3,13 @@ package com.sh.sh.pos.system.configuration;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+
+import com.sh.sh.pos.system.exception.InvalidTokenException;
 
 import javax.crypto.SecretKey;
 import java.util.Collection;
@@ -13,6 +17,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+@Slf4j
 @Service
 public class JwtProvider {
     static SecretKey key = Keys.hmacShaKeyFor(JwtConstant.JWT_SECRET.getBytes());
@@ -46,7 +51,7 @@ public class JwtProvider {
 
     public String getEmailFromToken(String jwt) {
         if (jwt == null || jwt.isBlank()) {
-            throw new RuntimeException("Token is missing");
+            throw new InvalidTokenException("Token is missing");
         }
         jwt = jwt.trim();
 
@@ -109,7 +114,7 @@ public class JwtProvider {
 
         } catch (Exception e) {
 
-            System.out.println("Invalid JWT Token: " + e.getMessage());
+            log.warn("Invalid JWT token: {}", e.getMessage());
 
             return false;
         }

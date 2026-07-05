@@ -1,17 +1,17 @@
-package com.sh.sh.pos.system.mapper.purchaseInvoicesMapper;
-
-import java.util.stream.Collectors;
+package com.sh.sh.pos.system.mapper.purchaseinvoicesmapper;
 
 import com.sh.sh.pos.system.domain.PurchaseInvoiceStatus;
-import com.sh.sh.pos.system.model.Branch;
-import com.sh.sh.pos.system.model.Store;
-import com.sh.sh.pos.system.model.purchaseInvoiceItems.PurchaseInvoiceItem;
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.model.branch.Branch;
+import com.sh.sh.pos.system.model.purchaseinvoiceitems.PurchaseInvoiceItem;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.model.store.Store;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
-import com.sh.sh.pos.system.payload.dto.purchaseInvoiceItemsDTO.PurchaseInvoiceItemDTO;
-import com.sh.sh.pos.system.payload.dto.purchaseInvoicesDTO.PurchaseInvoiceDTO;
+import com.sh.sh.pos.system.payload.dto.purchaseinvoiceitemsdto.PurchaseInvoiceItemDTO;
+import com.sh.sh.pos.system.payload.dto.purchaseinvoicesdto.PurchaseInvoiceDTO;
 
 public class PurchaseInvoiceMapper {
+        private PurchaseInvoiceMapper() {
+        }
 
         public static PurchaseInvoice toEntity(
                         PurchaseInvoiceDTO dto,
@@ -64,7 +64,7 @@ public class PurchaseInvoiceMapper {
                                                                 : invoice.getItems()
                                                                                 .stream()
                                                                                 .map(PurchaseInvoiceMapper::toItemDTO)
-                                                                                .collect(Collectors.toList()))
+                                                                                .toList())
                                 .build();
         }
 

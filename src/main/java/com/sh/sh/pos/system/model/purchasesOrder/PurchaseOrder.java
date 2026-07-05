@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.model.purchasesOrder;
+package com.sh.sh.pos.system.model.purchasesorder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -7,10 +7,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.sh.sh.pos.system.domain.PurchaseOrderStatus;
-import com.sh.sh.pos.system.model.Branch;
+import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.currencies.Currency;
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
-import com.sh.sh.pos.system.model.purchasesOrderItem.PurchaseOrderItem;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.model.purchasesorderitem.PurchaseOrderItem;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
 
 import jakarta.persistence.CascadeType;

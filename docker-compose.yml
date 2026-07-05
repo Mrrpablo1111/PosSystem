@@ -52,35 +52,68 @@ services:
     container_name: sh-pos-app
     restart: unless-stopped
     ports:
-      - "5500:5500"     # matches server.port=5500
+      - "5500:5500"
     depends_on:
       mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
     environment:
-      # Database — "mysql" = container name, not localhost
       SPRING_DATASOURCE_URL:      jdbc:mysql://mysql:3306/${DB_NAME}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-
-      # Redis — "redis" = container name, not localhost
       SPRING_DATA_REDIS_HOST:     redis
       SPRING_DATA_REDIS_PORT:     6379
       SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD}
-
-      # Mail
-      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
-      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
-      APP_MAIL_FROM_NAME:   ${MAIL_FROM_NAME}
-
-      # Encryption
-      APP_ENCRYPT_SECRET: ${APP_ENCRYPT_SECRET}
-      APP_ENCRYPT_IV:     ${APP_ENCRYPT_IV}
-
+      SPRING_MAIL_USERNAME:       ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD:       ${MAIL_PASSWORD}
+      APP_MAIL_FROM_NAME:         ${MAIL_FROM_NAME}
+      APP_ENCRYPT_SECRET:         ${APP_ENCRYPT_SECRET}
+      APP_ENCRYPT_IV:             ${APP_ENCRYPT_IV}
     networks:
       - pos-network
 
+  # ── SonarQube ────────────────────────────────────────────────────────────────
+  sonarqube:
+    image: sonarqube:lts-community
+    container_name: sh-pos-sonar
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      SONAR_JDBC_URL:      jdbc:postgresql://sonar-db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonar-data:/opt/sonarqube/data
+      - sonar-logs:/opt/sonarqube/logs
+      - sonar-extensions:/opt/sonarqube/extensions
+    networks:
+      - pos-network
+    depends_on:
+      - sonar-db
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9000/api/system/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # ── PostgreSQL for SonarQube ──────────────────────────────────────────────────
+  sonar-db:
+    image: postgres:15-alpine
+    container_name: sh-pos-sonar-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     sonar
+      POSTGRES_PASSWORD: sonar
+      POSTGRES_DB:       sonar
+    volumes:
+      - sonar-db-data:/var/lib/postgresql/data
+    networks:
+      - pos-network
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
 volumes:
   mysql-data:
     name: sh-pos-mysql-data
@@ -88,7 +121,20 @@ volumes:
   redis-data:
     name: sh-pos-redis-data
     driver: local
+  sonar-data:
+    name: sh-pos-sonar-data
+    driver: local
+  sonar-logs:
+    name: sh-pos-sonar-logs
+    driver: local
+  sonar-extensions:
+    name: sh-pos-sonar-extensions
+    driver: local
+  sonar-db-data:
+    name: sh-pos-sonar-db-data
+    driver: local
 
+# ── Networks ──────────────────────────────────────────────────────────────────
 networks:
   pos-network:
     name: sh-pos-network

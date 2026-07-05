@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.controller.suppliersController;
+package com.sh.sh.pos.system.controller.supplierscontroller;
 
 
 
@@ -7,8 +7,8 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierPaymentHistoryDTO;
-import com.sh.sh.pos.system.service.suppliersService.SupplierPaymentHistoryService;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierPaymentHistoryDTO;
+import com.sh.sh.pos.system.service.suppliersservice.SupplierPaymentHistoryService;
 
 import lombok.RequiredArgsConstructor;
 

@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.repository.priceRepository;
+package com.sh.sh.pos.system.repository.pricerepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -9,9 +9,9 @@ import org.springframework.data.jpa.repository.Query;
 import com.sh.sh.pos.system.model.price.PriceRule;
 
 public interface PriceRuleRepository extends JpaRepository<PriceRule, Long> {
-    List<PriceRule> findByProduct_Id(Long productId);
+     List<PriceRule> findByProductId(Long productId);
 
-    List<PriceRule> findByPriceGroup_Id(Long priceGroupId);
+    List<PriceRule> findByPriceGroupId(Long priceGroupId);
 
     @Query("""
                 SELECT r FROM PriceRule r

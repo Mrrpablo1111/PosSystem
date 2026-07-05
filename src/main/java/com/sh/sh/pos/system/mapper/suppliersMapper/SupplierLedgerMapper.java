@@ -1,11 +1,11 @@
-package com.sh.sh.pos.system.mapper.suppliersMapper;
+package com.sh.sh.pos.system.mapper.suppliersmapper;
 
 
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
-import com.sh.sh.pos.system.payload.dto.suppliersDTO.SupplierLedgerInvoiceDTO;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.payload.dto.suppliersdto.SupplierLedgerInvoiceDTO;
 
 public class SupplierLedgerMapper {
-
+    private SupplierLedgerMapper() {}
     public static SupplierLedgerInvoiceDTO toInvoiceDTO(
             PurchaseInvoice invoice) {
 

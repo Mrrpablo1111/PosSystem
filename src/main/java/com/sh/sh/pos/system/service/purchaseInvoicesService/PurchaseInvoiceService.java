@@ -1,9 +1,9 @@
-package com.sh.sh.pos.system.service.purchaseInvoicesService;
+package com.sh.sh.pos.system.service.purchaseinvoicesservice;
 
 import java.util.List;
 
 
-import com.sh.sh.pos.system.payload.dto.purchaseInvoicesDTO.PurchaseInvoiceDTO;
+import com.sh.sh.pos.system.payload.dto.purchaseinvoicesdto.PurchaseInvoiceDTO;
 
 public interface PurchaseInvoiceService {
 

@@ -1,22 +1,23 @@
 package com.sh.sh.pos.system.scheduler;
 
-
-
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.PurchaseOrderStatus;
-import com.sh.sh.pos.system.model.Store;
+import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.products.ProductBatch;
-import com.sh.sh.pos.system.model.purchasesOrder.PurchaseOrder;
-import com.sh.sh.pos.system.repository.ProductBatchRepository;
-import com.sh.sh.pos.system.repository.StoreRepository;
-import com.sh.sh.pos.system.repository.purchasesOrderRepository.PurchaseOrderRepository;
-import com.sh.sh.pos.system.service.EmailService;
+import com.sh.sh.pos.system.model.purchasesorder.PurchaseOrder;
+import com.sh.sh.pos.system.model.store.Store;
+import com.sh.sh.pos.system.model.storecontact.StoreContact;
+import com.sh.sh.pos.system.repository.productbatchrepository.ProductBatchRepository;
+import com.sh.sh.pos.system.repository.purchasesorderrepository.PurchaseOrderRepository;
+import com.sh.sh.pos.system.repository.storerepository.StoreRepository;
+import com.sh.sh.pos.system.service.emailservice.EmailService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class EmailScheduler {
 
-    private final EmailService            emailService;
+    private final EmailService emailService;
     private final PurchaseOrderRepository poRepository;
-    private final ProductBatchRepository  batchRepository;
-    private final StoreRepository         storeRepository;
+    private final ProductBatchRepository batchRepository;
+    private final StoreRepository storeRepository;
 
     /** Minimum remaining quantity before low-stock alert fires */
     private static final int LOW_STOCK_THRESHOLD = 10;
@@ -38,7 +39,7 @@ public class EmailScheduler {
     private static final int EXPIRY_DAYS_WARNING = 30;
 
     // ── Overdue PO check — runs every day at 08:00 ────────────────────────
-
+    @Transactional
     @Scheduled(cron = "0 0 8 * * *")
     public void checkOverduePurchaseOrders() {
         log.info("⏰ Running overdue PO check...");
@@ -51,11 +52,7 @@ public class EmailScheduler {
             poRepository.save(po);
 
             // Notify store manager via store contact email
-            String managerEmail = null;
-            try {
-                managerEmail = po.getBranch().getStore().getContact().getEmail();
-            } catch (Exception ignored) {}
-
+            String managerEmail = resolveManagerEmail(po);
             emailService.sendOverduePOAlert(po, managerEmail);
         });
 
@@ -68,13 +65,11 @@ public class EmailScheduler {
     public void checkLowStock() {
         log.info("⏰ Running low stock check...");
 
-        List<Store> stores = storeRepository.findAll();
-
-        stores.forEach(store -> {
-            String managerEmail = store.getContact() != null
-                    ? store.getContact().getEmail() : null;
-
-            if (managerEmail == null || managerEmail.isBlank()) return;
+        storeRepository.findAll().forEach(store -> {
+            String managerEmail = resolveManagerEmail(store);
+            if (managerEmail == null || managerEmail.isBlank()) {
+                return;
+            }
 
             List<ProductBatch> lowBatches = batchRepository
                     .findByBranchStoreIdAndRemainingQuantityLessThanEqual(
@@ -95,19 +90,17 @@ public class EmailScheduler {
 
         LocalDate warningDate = LocalDate.now().plusDays(EXPIRY_DAYS_WARNING);
 
-        List<Store> stores = storeRepository.findAll();
-
-        stores.forEach(store -> {
-            String managerEmail = store.getContact() != null
-                    ? store.getContact().getEmail() : null;
-
-            if (managerEmail == null || managerEmail.isBlank()) return;
+        storeRepository.findAll().forEach(store -> {
+            String managerEmail = resolveManagerEmail(store);
+            if (managerEmail == null || managerEmail.isBlank()) {
+                return;
+            }
 
             List<ProductBatch> expiring = batchRepository
                     .findByBranchStoreIdAndExpiryDateBefore(store.getId(), warningDate)
                     .stream()
                     .filter(b -> b.getRemainingQuantity() > 0)
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (!expiring.isEmpty()) {
                 emailService.sendExpiryAlert(store, expiring, managerEmail);
@@ -122,11 +115,11 @@ public class EmailScheduler {
     public void sendDailySalesReports() {
         log.info("⏰ Sending daily sales reports...");
 
-        // TODO: inject ReportService and call reportService.buildDailySalesHtml(store, yesterday)
         // For now just a placeholder
         storeRepository.findAll().forEach(store -> {
             String managerEmail = store.getContact() != null
-                    ? store.getContact().getEmail() : null;
+                    ? store.getContact().getEmail()
+                    : null;
             if (managerEmail != null) {
                 String html = buildPlaceholderDailyReport(store);
                 emailService.sendDailySalesReport(store, html);
@@ -140,7 +133,6 @@ public class EmailScheduler {
     public void sendMonthlyReports() {
         log.info("⏰ Sending monthly reports...");
 
-        // TODO: inject ReportService and call reportService.buildMonthlyReportHtml(store, lastMonth)
         storeRepository.findAll().forEach(store -> {
             String html = buildPlaceholderMonthlyReport(store);
             emailService.sendMonthlyReport(store, html);
@@ -151,15 +143,29 @@ public class EmailScheduler {
 
     private String buildPlaceholderDailyReport(Store store) {
         return "<html><body style='font-family:Arial,sans-serif'>"
-             + "<h2 style='color:#10b981'>Daily Sales Report — " + store.getBrand() + "</h2>"
-             + "<p>Connect your ReportService to populate this with real sales data.</p>"
-             + "</body></html>";
+                + "<h2 style='color:#10b981'>Daily Sales Report — " + store.getBrand() + "</h2>"
+                + "<p>Connect your ReportService to populate this with real sales data.</p>"
+                + "</body></html>";
     }
 
     private String buildPlaceholderMonthlyReport(Store store) {
         return "<html><body style='font-family:Arial,sans-serif'>"
-             + "<h2 style='color:#10b981'>Monthly Report — " + store.getBrand() + "</h2>"
-             + "<p>Connect your ReportService to populate this with real monthly data.</p>"
-             + "</body></html>";
+                + "<h2 style='color:#10b981'>Monthly Report — " + store.getBrand() + "</h2>"
+                + "<p>Connect your ReportService to populate this with real monthly data.</p>"
+                + "</body></html>";
+    }
+
+    private static String resolveManagerEmail(PurchaseOrder po) {
+        return Optional.ofNullable(po.getBranch())
+                .map(Branch::getStore)
+                .map(EmailScheduler::resolveManagerEmail)
+                .orElse(null);
+    }
+
+    private static String resolveManagerEmail(Store store) {
+        return Optional.ofNullable(store)
+                .map(Store::getContact)
+                .map(StoreContact::getEmail)
+                .orElse(null);
     }
 }

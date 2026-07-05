@@ -1,13 +1,12 @@
-package com.sh.sh.pos.system.model.purchaseInvoiceItems;
+package com.sh.sh.pos.system.model.purchaseinvoiceitems;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.model.products.ProductVariant;
-import com.sh.sh.pos.system.model.purchaseInvoices.PurchaseInvoice;
+import com.sh.sh.pos.system.model.purchaseinvoices.PurchaseInvoice;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
