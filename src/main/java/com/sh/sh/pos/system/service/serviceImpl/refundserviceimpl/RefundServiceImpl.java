@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.OrderStatus;
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
@@ -21,7 +21,7 @@ import com.sh.sh.pos.system.service.refundservice.RefundService;
 import com.sh.sh.pos.system.service.userservice.UserService;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service

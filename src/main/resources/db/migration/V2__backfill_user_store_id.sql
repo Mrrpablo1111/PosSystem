@@ -1,3 +1,4 @@
+
 -- This migration backfills all existing admin users so their store_id
 -- correctly points to the store they administer.
 

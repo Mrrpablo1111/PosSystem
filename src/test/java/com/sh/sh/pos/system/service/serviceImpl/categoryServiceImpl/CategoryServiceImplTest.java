@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl.categoryServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.categoryServiceImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

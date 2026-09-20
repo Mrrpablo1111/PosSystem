@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.PaymentType;
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
@@ -34,7 +35,7 @@ import com.sh.sh.pos.system.repository.userrepository.UserRepository;
 import com.sh.sh.pos.system.service.shiftreportservice.ShiftReportService;
 import com.sh.sh.pos.system.service.userservice.UserService;
 
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

@@ -41,6 +41,9 @@ public interface EmailService {
      * @param managerEmail store manager email from Store.contact.email
      */
     void sendOverduePOAlert(PurchaseOrder order, String managerEmail);
+
+
+    void sendOutstandingItemsReminderEmail(PurchaseOrder order);
  
     // ── Reports & Alerts ─────────────────────────────────────────────────
  

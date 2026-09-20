@@ -68,6 +68,7 @@ public class Order {
 	@OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
 	private List<OrderItem> items;
 	
+	@Builder.Default
 	private OrderStatus status = OrderStatus.COMPLETED;
 	@PrePersist
 	protected void onCreate() {

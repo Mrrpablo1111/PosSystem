@@ -1,4 +1,4 @@
-  package com.sh.sh.pos.system.payload.dto.categorydto;
+package com.sh.sh.pos.system.payload.dto.categorydto;
 
 import lombok.Builder;
 import lombok.Data;

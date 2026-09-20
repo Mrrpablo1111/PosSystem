@@ -97,6 +97,7 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
     // ── Read ──────────────────────────────────────────────────────────────
 
     @Override
+    @Transactional(readOnly = true) 
     public PurchaseInvoiceDTO getById(Long id) {
         return PurchaseInvoiceMapper.toDTO(
                 invoiceRepository.findById(id)
@@ -105,6 +106,7 @@ public class PurchaseInvoiceServiceImpl implements PurchaseInvoiceService {
     }
 
     @Override
+    @Transactional(readOnly = true)  
     public List<PurchaseInvoiceDTO> getAll() {
         return invoiceRepository.findAll()
                 .stream()

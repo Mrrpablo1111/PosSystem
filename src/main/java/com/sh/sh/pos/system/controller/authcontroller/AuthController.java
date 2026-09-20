@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sh.sh.pos.system.configuration.JwtProvider;
-import com.sh.sh.pos.system.exceptions.UserException;
+
 import com.sh.sh.pos.system.payload.dto.userdto.UserDTO;
 import com.sh.sh.pos.system.payload.request.ForgotPasswordDto;
 
@@ -58,9 +58,8 @@ public class AuthController {
 		authService.createPasswordResetToken(req.getEmail());
 
 		return ResponseEntity.ok(
-				new MessageResponse("If email exists, reset link sent to " + req.getEmail()));
+				new MessageResponse("If an account exists with that email, a reset link has been sent"));
 	}
-
 	@PostMapping("/reset-password")
 	public ResponseEntity<MessageResponse> resetPassword(
 			@RequestBody ResetPasswordDto req)  {

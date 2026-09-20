@@ -10,6 +10,7 @@ public class ProductVariantDTO {
     private Long id;
 
     private Long productId;
+    private List<Long> optionValueIds;
 
     private String itemCode;
     private String name;

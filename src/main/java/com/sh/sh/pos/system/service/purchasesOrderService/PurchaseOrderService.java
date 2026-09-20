@@ -29,6 +29,8 @@ public interface PurchaseOrderService {
 
     PurchaseOrderDTO sendToSupplier(Long id);
 
+    void resendToSupplier(Long id);
+
     // ── Tracking ──────────────────────────────────────────────────────────
 
     PurchaseOrderDTO updateTracking(Long id, UpdateTrackingRequestDTO req);

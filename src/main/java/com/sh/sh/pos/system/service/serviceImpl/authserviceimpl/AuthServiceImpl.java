@@ -150,8 +150,9 @@ public class AuthServiceImpl implements AuthService {
 	public void createPasswordResetToken(String email) throws MessagingException {
 		User user = userRepository.findByEmail(email);
 		if (user == null) {
-        throw new UserException("No account found with email: " + email);
-    }
+			log.info("Password reset requested for unknown email — no action taken");
+			return;
+		}
 		String token = UUID.randomUUID().toString();
 
 		passwordResetRedisService.saveToken(token, user.getEmail());

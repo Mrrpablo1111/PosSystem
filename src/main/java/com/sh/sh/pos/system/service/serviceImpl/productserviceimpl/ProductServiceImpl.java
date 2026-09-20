@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.UnitType;
 import com.sh.sh.pos.system.domain.UserRole;
@@ -22,7 +23,6 @@ import com.sh.sh.pos.system.repository.storerepository.StoreRepository;
 import com.sh.sh.pos.system.repository.suppliersrepository.SupplierRepository;
 import com.sh.sh.pos.system.service.productservice.ProductService;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -52,6 +52,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public ProductDTO getProductById(Long id) {
 		return ProductMapper.toDTO(findProduct(id));
 	}
@@ -74,6 +75,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<ProductDTO> searchBykeyword(Long storeId, String keyword) {
 		return productRepository.searchByKeyword(storeId, keyword)
 				.stream()
@@ -87,30 +89,58 @@ public class ProductServiceImpl implements ProductService {
 		Product product = findProduct(id);
 		checkAuthority(product.getStore(), user);
 
-		validateSkuUnique(productDTO.getSku(), id);
-		validateBarcodeUnique(productDTO.getBarcode(), id);
+		// Uniqueness only needs checking when the value is actually changing
+		if (productDTO.getSku() != null && !productDTO.getSku().equals(product.getSku())) {
+			validateSkuUnique(productDTO.getSku(), id);
+		}
+		if (productDTO.getBarcode() != null && !productDTO.getBarcode().equals(product.getBarcode())) {
+			validateBarcodeUnique(productDTO.getBarcode(), id);
+		}
 
-		product.setName(productDTO.getName());
-		product.setDescription(productDTO.getDescription());
-		product.setSku(productDTO.getSku());
-		product.setBarcode(productDTO.getBarcode());
-		product.setImage(productDTO.getImage());
-		product.setMrp(productDTO.getMrp());
-		product.setSellingPrice(productDTO.getSellingPrice());
-		product.setCostPrice(productDTO.getCostPrice());
-		product.setBrand(productDTO.getBrand());
-		product.setUnit(UnitType.valueOf(productDTO.getUnit()));
-		product.setDefaultReorderLevel(productDTO.getDefaultReorderLevel());
-		product.setActive(productDTO.getActive());
-		product.setWeight(productDTO.getWeight());
+		// ── Partial update: null = "keep the current value" ────────────────
+		// A client that omits a field never wipes it, and NOT NULL columns
+		// (like active) can no longer be nulled by an incomplete payload.
+		applyIfPresent(productDTO.getName(), product::setName);
+		applyIfPresent(productDTO.getDescription(), product::setDescription);
+		applyIfPresent(productDTO.getSku(), product::setSku);
+		applyIfPresent(productDTO.getBarcode(), product::setBarcode);
+		applyIfPresent(productDTO.getImage(), product::setImage);
+		applyIfPresent(productDTO.getMrp(), product::setMrp);
+		applyIfPresent(productDTO.getSellingPrice(), product::setSellingPrice);
+		applyIfPresent(productDTO.getCostPrice(), product::setCostPrice);
+		applyIfPresent(productDTO.getBrand(), product::setBrand);
+		applyIfPresent(productDTO.getDefaultReorderLevel(), product::setDefaultReorderLevel);
+		applyIfPresent(productDTO.getActive(), product::setActive);
+		applyIfPresent(productDTO.getWeight(), product::setWeight);
 
-		// apply relations
-		product.setSupplier(resolveSupplier(productDTO.getSupplierId()));
+		if (productDTO.getUnit() != null && !productDTO.getUnit().isBlank()) {
+			try {
+				product.setUnit(UnitType.valueOf(productDTO.getUnit().toUpperCase()));
+			} catch (IllegalArgumentException e) {
+				throw new UserException("Invalid unit type: '" + productDTO.getUnit()
+						+ "'. Valid values: " + java.util.Arrays.toString(UnitType.values()));
+			}
+		}
+
+		// ── Relations ──────────────────────────────────────────────────────
+		// supplierId null = "leave supplier as is". If the UI ever needs a
+		// "remove supplier" action, expose it explicitly (e.g. a dedicated
+		// endpoint or a clearSupplier flag) rather than treating null as clear.
+		if (productDTO.getSupplierId() != null) {
+			product.setSupplier(resolveSupplier(productDTO.getSupplierId()));
+		}
 		if (productDTO.getCategoryId() != null) {
 			product.setCategory(findCategory(productDTO.getCategoryId()));
 		}
 
 		return ProductMapper.toDTO(productRepository.save(product));
+	}
+
+	/** Applies a value to a setter only when the value is non-null. */
+	private static <T> void applyIfPresent(T value, java.util.function.Consumer<T> setter) {
+		if (value != null) {
+			setter.accept(value);
+		}
 	}
 
 	@Override

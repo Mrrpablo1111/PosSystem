@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.StockRequestStatus;
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
@@ -24,7 +25,7 @@ import com.sh.sh.pos.system.repository.productvariantrepository.ProductVariantRe
 import com.sh.sh.pos.system.repository.stockrepository.StockRequestRepository;
 import com.sh.sh.pos.system.service.stockservice.StockRequestService;
 
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service

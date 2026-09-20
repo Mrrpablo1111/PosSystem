@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.UserRole;
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
@@ -30,10 +31,9 @@ public class BranchServiceImpl implements BranchService {
 
 	@Override
 	public BranchDTO createBranch(BranchDTO branchDTO, User user) {
-		Store store = storeRepository.findByStoreAdminId(user.getId());
-		if (store == null) {
-			throw new ResourceNotFoundException("No store found for user id: " + user.getId());
-		}
+		Store store = storeRepository.findByStoreAdminId(user.getId())
+				.orElseThrow(() -> new ResourceNotFoundException(
+						"No store found for user id: " + user.getId()));
 
 		Branch branch = BranchMapper.toEntity(branchDTO, store);
 		return BranchMapper.toDTO(branchRepository.save(branch));
@@ -65,30 +65,38 @@ public class BranchServiceImpl implements BranchService {
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public List<BranchDTO> getAllBranchesByStoreId(Long storeId) {
 		User currentUser = userService.getCurrentUser();
 		Store store = storeRepository.findById(storeId)
 				.orElseThrow(() -> new ResourceNotFoundException("Store not found with id: " + storeId));
 
-		// Check if current user is allowed
-		boolean isStoreManager = currentUser.getRole() == UserRole.ROLE_STORE_MANAGER &&
-				currentUser.getStore() != null &&
-				currentUser.getStore().getId().equals(storeId);
+		Long userStoreId = currentUser.getStore() != null ? currentUser.getStore().getId() : null;
 
-		boolean isStoreAdmin = currentUser.getRole() == UserRole.ROLE_STORE_ADMIN &&
-				store.getStoreAdmin() != null &&
-				store.getStoreAdmin().getId().equals(currentUser.getId());
+		boolean isStoreManager = currentUser.getRole() == UserRole.ROLE_STORE_MANAGER
+				&& userStoreId != null
+				&& userStoreId.equals(storeId);
+
+		boolean isStoreAdmin = currentUser.getRole() == UserRole.ROLE_STORE_ADMIN
+				&& store.getStoreAdmin() != null
+				&& store.getStoreAdmin().getId().equals(currentUser.getId());
 
 		if (!isStoreManager && !isStoreAdmin) {
 			throw new UserException("You are not authorized to access this store's branches");
 		}
 
-		return branchRepository.findByStoreId(store.getId()).stream()
-				.map(BranchMapper::toDTO)
-				.toList();
+		return branchRepository.findByStoreId(storeId).stream()
+        .map(branch -> {
+            if (branch.getWorkingDays() != null) {
+                branch.getWorkingDays().size();   // ← forces lazy init inside the session
+            }
+            return BranchMapper.toDTO(branch);
+        })
+        .toList();
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public BranchDTO getBranchById(Long id) {
 		return BranchMapper.toDTO(findBranchOrThrow(id));
 	}

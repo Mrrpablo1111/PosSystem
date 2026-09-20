@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.exception.UserException;
@@ -20,7 +21,6 @@ import com.sh.sh.pos.system.repository.productvariantrepository.ProductVariantRe
 import com.sh.sh.pos.system.repository.productvariantvaluerepository.ProductVariantValueRepository;
 import com.sh.sh.pos.system.service.productservice.ProductVariantService;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -44,7 +44,9 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         if (dto.getBarcode() != null && variantRepository.existsByBarcode(dto.getBarcode())) {
             throw new UserException(BARCODE_EXISTS);
         }
-
+        if (dto.getItemCode() == null || dto.getItemCode().isBlank()) {
+            dto.setItemCode(generateItemCode());
+        }
         Product product = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Product not found with id: " + dto.getProductId()));
@@ -59,52 +61,29 @@ public class ProductVariantServiceImpl implements ProductVariantService {
     @Override
     public ProductVariantDTO update(Long id, ProductVariantDTO dto) {
         ProductVariant variant = findVariantOrThrow(id);
-
-        // Validate uniqueness BEFORE mutating — comparisons must use current DB values
-        if (!variant.getSku().equals(dto.getSku())
+        if (dto.getSku() != null && !dto.getSku().equals(variant.getSku())
                 && variantRepository.existsBySku(dto.getSku())) {
-            throw new UserException(SKU_EXISTS);
+            throw new UserException("SKU '" + dto.getSku() + "' is already in use.");
         }
-        if (dto.getBarcode() != null
-                && !dto.getBarcode().equals(variant.getBarcode())
+        if (dto.getBarcode() != null && !dto.getBarcode().equals(variant.getBarcode())
                 && variantRepository.existsByBarcode(dto.getBarcode())) {
-            throw new UserException(BARCODE_EXISTS);
+            throw new UserException("Barcode '" + dto.getBarcode() + "' is already assigned to another variant.");
         }
-
-        variant.setName(dto.getName());
-        variant.setSku(dto.getSku());
-        variant.setBarcode(dto.getBarcode());
-        variant.setItemCode(dto.getItemCode());
-        variant.setCostPrice(dto.getCostPrice());
-        variant.setSellingPrice(dto.getSellingPrice());
-        variant.setActive(dto.getActive());
-
-        // Replace option values
-        variant.getValues().clear();
-        variantValueRepository.deleteByVariantId(variant.getId());
-        if (dto.getValues() != null) {
-            variant.getValues().addAll(
-                    buildVariantValues(dto.getValues(), variant, variant.getProduct().getId()));
-        }
-
+        ProductVariantMapper.applyTo(variant, dto);
         return ProductVariantMapper.toDTO(variantRepository.save(variant));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ProductVariantDTO get(Long id) {
         return ProductVariantMapper.toDTO(findVariantOrThrow(id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ProductVariantDTO> getByProduct(Long productId) {
-        if (!productRepository.existsById(productId)) {
-            throw new ResourceNotFoundException("Product not found with id: " + productId);
-        }
-
-        return variantRepository.findByProductId(productId)
-                .stream()
-                .map(ProductVariantMapper::toDTO)
-                .toList();
+        return ProductVariantMapper.toDTOList(
+                variantRepository.findByProductIdWithValues(productId)); // ← was findByProductId
     }
 
     @Transactional
@@ -150,5 +129,18 @@ public class ProductVariantServiceImpl implements ProductVariantService {
             variantValues.add(variantValue);
         }
         return variantValues;
+    }
+
+    private String generateItemCode() {
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O, 1/I
+        java.security.SecureRandom rnd = new java.security.SecureRandom();
+        String candidate;
+        do {
+            StringBuilder sb = new StringBuilder("IC-");
+            for (int i = 0; i < 6; i++)
+                sb.append(chars.charAt(rnd.nextInt(chars.length())));
+            candidate = sb.toString();
+        } while (variantRepository.existsByItemCode(candidate)); // avoid rare collisions
+        return candidate;
     }
 }

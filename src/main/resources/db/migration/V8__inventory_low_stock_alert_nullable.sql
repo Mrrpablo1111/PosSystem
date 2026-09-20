@@ -1,0 +1,1 @@
+ALTER TABLE inventories MODIFY COLUMN low_stock_alert INT NULL;

@@ -23,6 +23,9 @@ public interface ProductBatchRepository
 
         List<ProductBatch> findByProductIdAndBranchIdAndRemainingQuantityGreaterThanOrderByExpiryDateAsc(
                         Long productId, Long branchId, Integer remainingQuantity);
+        
+        Optional<ProductBatch> findByWarehouseIdAndProductIdAndBatchNo(
+        Long warehouseId, Long productId, String batchNo);
 
         List<ProductBatch> findBySupplierId(Long supplierId);
 

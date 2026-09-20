@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl.storeServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.storeServiceImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

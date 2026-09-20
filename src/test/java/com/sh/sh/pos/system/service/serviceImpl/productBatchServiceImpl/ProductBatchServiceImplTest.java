@@ -1,14 +1,15 @@
-package com.sh.sh.pos.system.service.serviceImpl.productBatchServiceImpl;
-
+package com.sh.sh.pos.system.service.serviceimpl.productbatchserviceimpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -45,9 +46,19 @@ class ProductBatchServiceImplTest {
     private ProductBatchServiceImpl batchService;
 
     private ProductBatch batch;
+    private Product product;
+    private Branch branch;
 
     @BeforeEach
     void setUp() {
+        product = new Product();
+        product.setId(5L);
+        product.setName("Coca-Cola 330ml");
+
+        branch = new Branch();
+        branch.setId(7L);
+        branch.setName("Main Branch");
+
         // 100 received, 40 already sold → 60 remaining
         batch = new ProductBatch();
         batch.setId(1L);
@@ -56,6 +67,8 @@ class ProductBatchServiceImplTest {
         batch.setRemainingQuantity(60);
         batch.setPurchasePrice(new BigDecimal("2.50"));
         batch.setExpiryDate(LocalDate.now().plusMonths(6));
+        batch.setProduct(product);
+        batch.setBranch(branch);
     }
 
     private ProductBatchDTO updateDto(Integer quantity) {
@@ -113,6 +126,7 @@ class ProductBatchServiceImplTest {
 
         batchService.update(1L, updateDto(100));
 
+        assertThat(batch.getQuantity()).isEqualTo(100);
         assertThat(batch.getRemainingQuantity()).isEqualTo(60);
     }
 
@@ -128,7 +142,65 @@ class ProductBatchServiceImplTest {
         assertThat(batch.getRemainingQuantity()).isEqualTo(60);
     }
 
+    // ── Create ────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("create → valid → saved ✅")
+    void create_valid_saved() {
+        ProductBatchDTO dto = updateDto(100);
+        dto.setProductId(5L);
+        dto.setBranchId(7L);
+
+        when(productRepository.findById(5L)).thenReturn(Optional.of(product));
+        when(branchRepository.findById(7L)).thenReturn(Optional.of(branch));
+        when(batchRepository.save(any(ProductBatch.class))).thenReturn(batch);
+
+        assertThat(batchService.create(dto)).isNotNull();
+        verify(batchRepository).save(any(ProductBatch.class));
+    }
+
+    @Test
+    @DisplayName("create → unknown product id → 404, nothing saved ❌")
+    void create_productNotFound() {
+        ProductBatchDTO dto = updateDto(100);
+        dto.setProductId(5L);
+        dto.setBranchId(7L);
+
+        when(productRepository.findById(5L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> batchService.create(dto))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Product not found");
+
+        verify(batchRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("create → unknown branch id → 404, nothing saved ❌")
+    void create_branchNotFound() {
+        ProductBatchDTO dto = updateDto(100);
+        dto.setProductId(5L);
+        dto.setBranchId(7L);
+
+        when(productRepository.findById(5L)).thenReturn(Optional.of(product));
+        when(branchRepository.findById(7L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> batchService.create(dto))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Branch not found");
+
+        verify(batchRepository, never()).save(any());
+    }
+
     // ── Lookups & delete ──────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("get → found → DTO returned ✅")
+    void get_found() {
+        when(batchRepository.findById(1L)).thenReturn(Optional.of(batch));
+
+        assertThat(batchService.get(1L)).isNotNull();
+    }
 
     @Test
     @DisplayName("get → unknown id → 404 ❌")
@@ -141,31 +213,12 @@ class ProductBatchServiceImplTest {
     }
 
     @Test
-    @DisplayName("create → unknown product id → 404, nothing saved ❌")
-    void create_productNotFound() {
-        ProductBatchDTO dto = updateDto(100);
-        dto.setProductId(5L);
-        dto.setBranchId(7L);
-        when(productRepository.findById(5L)).thenReturn(Optional.empty());
+    @DisplayName("getExpiringBatches → delegates with correct date window ✅")
+    void getExpiringBatches_windowed() {
+        when(batchRepository.findByExpiryDateBetween(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(batch));
 
-        assertThatThrownBy(() -> batchService.create(dto))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Product not found");
-    }
-
-    @Test
-    @DisplayName("create → valid → saved ✅")
-    void create_valid_saved() {
-        ProductBatchDTO dto = updateDto(100);
-        dto.setProductId(5L);
-        dto.setBranchId(7L);
-
-        when(productRepository.findById(5L)).thenReturn(Optional.of(new Product()));
-        when(branchRepository.findById(7L)).thenReturn(Optional.of(new Branch()));
-        when(batchRepository.save(any(ProductBatch.class))).thenReturn(batch);
-
-        assertThat(batchService.create(dto)).isNotNull();
-        verify(batchRepository).save(any(ProductBatch.class));
+        assertThat(batchService.getExpiringBatches(30)).hasSize(1);
     }
 
     @Test

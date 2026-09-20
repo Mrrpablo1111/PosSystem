@@ -13,9 +13,8 @@ import com.sh.sh.pos.system.domain.StoreStatus;
 import com.sh.sh.pos.system.model.store.Store;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
-	Store findByStoreAdminId(Long adminId);
-
-	List<Store> findByStatus(StoreStatus storeStatus);
+   
+    List<Store> findByStatus(StoreStatus storeStatus);
 
     @Query("""
             SELECT s FROM Store s
@@ -24,19 +23,26 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
             """)
     Optional<Store> findByIdWithAdmin(@Param("id") Long id);
 
-	@Query("""
-        SELECT COUNT(s)
-        FROM Store s
-        WHERE DATE(s.createdAt) = :date
-    """)
-     Long countByDate(@Param("date") LocalDate date);
+    @Query("""
+            SELECT s FROM Store s
+            LEFT JOIN FETCH s.storeAdmin              
+            WHERE s.storeAdmin.id = :adminId
+            """)
+    Optional<Store> findByStoreAdminId(Long adminId);
 
     @Query("""
-    SELECT s.createdAt AS regDate, COUNT(s) AS count
-    FROM Store s
-    WHERE s.createdAt >= :startDate
-    GROUP BY s.createdAt
-    ORDER BY regDate ASC
-""")
-	List<Object[]> getStoreRegistrationStats(@Param("startDate") LocalDateTime startDate);
+                SELECT COUNT(s)
+                FROM Store s
+                WHERE DATE(s.createdAt) = :date
+            """)
+    Long countByDate(@Param("date") LocalDate date);
+
+    @Query("""
+                SELECT s.createdAt AS regDate, COUNT(s) AS count
+                FROM Store s
+                WHERE s.createdAt >= :startDate
+                GROUP BY s.createdAt
+                ORDER BY regDate ASC
+            """)
+    List<Object[]> getStoreRegistrationStats(@Param("startDate") LocalDateTime startDate);
 }

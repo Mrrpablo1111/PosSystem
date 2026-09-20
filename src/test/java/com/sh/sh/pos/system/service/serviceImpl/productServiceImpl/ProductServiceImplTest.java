@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl.productServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.productServiceImpl;
 
 
 import static org.assertj.core.api.Assertions.assertThat;

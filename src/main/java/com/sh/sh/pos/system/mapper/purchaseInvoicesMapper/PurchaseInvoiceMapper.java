@@ -46,6 +46,10 @@ public class PurchaseInvoiceMapper {
                                                                 ? invoice.getPurchaseOrder().getId()
                                                                 : null)
                                 .supplierInvoiceNo(invoice.getSupplierInvoiceNo())
+                                .purchaseOrderNumber(
+                                                invoice.getPurchaseOrder() != null
+                                                                ? invoice.getPurchaseOrder().getPoNumber()
+                                                                : null)
                                 .invoiceDate(invoice.getInvoiceDate())
                                 .status(invoice.getStatus() != null ? invoice.getStatus().name() : null)
                                 .subtotal(invoice.getSubtotal())
@@ -68,14 +72,10 @@ public class PurchaseInvoiceMapper {
                                 .build();
         }
 
-        private static PurchaseInvoiceItemDTO toItemDTO(
-                        PurchaseInvoiceItem item) {
-
+        private static PurchaseInvoiceItemDTO toItemDTO(PurchaseInvoiceItem item) {
                 return PurchaseInvoiceItemDTO.builder()
-                                .productId(item.getProduct().getId())
-                                .variantId(item.getVariant() != null
-                                                ? item.getVariant().getId()
-                                                : null)
+                                .productId(item.getProduct() != null ? item.getProduct().getId() : null) // ← guarded
+                                .variantId(item.getVariant() != null ? item.getVariant().getId() : null)
                                 .quantity(item.getQuantity())
                                 .unitCost(item.getUnitCost())
                                 .batchNo(item.getBatchNo())

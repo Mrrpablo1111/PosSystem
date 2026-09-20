@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.service.serviceimpl.suppliersserviceimpl;
 import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.PaymentStatus;
 import com.sh.sh.pos.system.mapper.suppliersmapper.SupplierPaymentMapper;
@@ -15,7 +16,7 @@ import com.sh.sh.pos.system.repository.suppliersrepository.SupplierPaymentReposi
 import com.sh.sh.pos.system.service.suppliersservice.SupplierPaymentService;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service

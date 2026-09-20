@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.service.serviceimpl.currenciesserviceimpl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.exception.UserException;
@@ -13,7 +14,6 @@ import com.sh.sh.pos.system.payload.request.CurrencyRequestDTO;
 import com.sh.sh.pos.system.repository.currenciesrepository.CurrencyRepository;
 import com.sh.sh.pos.system.service.currenciesservice.CurrencyService;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service

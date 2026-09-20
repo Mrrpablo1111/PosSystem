@@ -6,14 +6,16 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-
 import com.sh.sh.pos.system.domain.ExpiryStatus;
 import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
+import com.sh.sh.pos.system.model.warehouses.Warehouse;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
@@ -40,7 +42,7 @@ import lombok.Setter;
 })
 public class ProductBatch {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -68,11 +70,18 @@ public class ProductBatch {
     private Supplier supplier;
 
     @Column(nullable = false)
-    private Integer remainingQuantity; 
+    private Integer remainingQuantity;
 
     @ManyToOne
     @JoinColumn(name = "variant_id")
     private ProductVariant variant;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
+
+    @Column(name = "manufacture_date")
+    private LocalDate manufactureDate;
 
     @Transient
     public boolean isExpired() {

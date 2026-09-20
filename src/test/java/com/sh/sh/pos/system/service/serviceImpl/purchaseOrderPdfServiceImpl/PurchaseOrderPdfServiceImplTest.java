@@ -1,4 +1,4 @@
-package com.sh.sh.pos.system.service.serviceImpl.purchaseOrderPdfServiceImpl;
+package com.sh.sh.pos.system.service.serviceimpl.purchaseOrderPdfServiceImpl;
 
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

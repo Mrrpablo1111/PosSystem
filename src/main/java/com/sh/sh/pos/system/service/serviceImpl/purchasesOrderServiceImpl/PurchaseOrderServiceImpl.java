@@ -5,11 +5,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.PurchaseOrderStatus;
+import com.sh.sh.pos.system.exception.ResourceNotFoundException;
+import com.sh.sh.pos.system.exception.UserException;
 import com.sh.sh.pos.system.mapper.purchasesordermapper.PurchaseOrderMapper;
 import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.currencies.Currency;
@@ -63,6 +64,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         }
 
         @Override
+        @Transactional(readOnly = true)
         public List<PurchaseOrderDTO> getAll() {
                 return purchaseOrderRepository.findAll()
                                 .stream()
@@ -71,6 +73,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         }
 
         @Override
+        @Transactional(readOnly = true)
         public PurchaseOrderDTO getById(Long id) {
                 return mapper.toDTO(findOrThrow(id));
         }
@@ -190,9 +193,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 }
                 PurchaseOrder saved = purchaseOrderRepository.save(order);
 
-                if(saved.getStatus() == PurchaseOrderStatus.RECEIVED){
-                log.info("📧 Sending receipt confirmation email for PO={}", saved.getPoNumber());
-                emailService.sendReceiptConfirmationEmail(saved);
+                if (saved.getStatus() == PurchaseOrderStatus.RECEIVED) {
+                        log.info("📧 Sending receipt confirmation email for PO={}", saved.getPoNumber());
+                        emailService.sendReceiptConfirmationEmail(saved);
                 }
                 return mapper.toDTO(saved);
         }
@@ -219,6 +222,22 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 return mapper.toDTO(saved);
         }
 
+        @Override
+        @Transactional(readOnly = true)
+        public void resendToSupplier(Long id) {
+                PurchaseOrder order = purchaseOrderRepository.findByIdWithAllRelations(id)
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "Purchase order not found with id: " + id));
+
+                if (order.getStatus() != PurchaseOrderStatus.PENDING
+                                && order.getStatus() != PurchaseOrderStatus.PARTIALLY_RECEIVED) {
+                        throw new UserException(
+                                        "Can only send a reminder for a pending or partially-received order, current status: "
+                                                        + order.getStatus());
+                }
+
+                emailService.sendOutstandingItemsReminderEmail(order);
+        }
         // ── Update tracking ───────────────────────────────────────────────────
 
         @Override

@@ -4,9 +4,12 @@ import java.time.LocalDateTime;
 
 import com.sh.sh.pos.system.model.branch.Branch;
 import com.sh.sh.pos.system.model.products.Product;
+import com.sh.sh.pos.system.model.products.ProductVariant;
+import com.sh.sh.pos.system.model.warehouses.Warehouse;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -22,65 +25,87 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Setter
 @Getter
-@Table(name = "inventories", uniqueConstraints = {
-		@UniqueConstraint(columnNames = { "branch_id", "product_id" })
-}, indexes = {
-		@Index(name = "idx_inventory_branch_product", columnList = "branch_id, product_id")
-})
-@AllArgsConstructor
-@RequiredArgsConstructor
 @Entity
 @Builder
-
+@NoArgsConstructor        
+@AllArgsConstructor
+@Table(
+    name = "inventories",
+    uniqueConstraints = {
+        // One stock row per product(+variant) per WAREHOUSE.
+        // The old (branch_id, product_id) constraint would reject the same
+        // product stocked in a branch's second warehouse.
+        @UniqueConstraint(
+            name = "uk_inventory_warehouse_product_variant",
+            columnNames = { "warehouse_id", "product_id", "product_variant_id" })
+    },
+    indexes = {
+        @Index(name = "idx_inventory_branch_product", columnList = "branch_id, product_id"),
+        @Index(name = "idx_inventory_warehouse", columnList = "warehouse_id")
+    }
+)
 public class Inventory {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "branch_id", nullable = false)
-	private Branch branch;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // was AUTO — same fix you applied elsewhere
+    private Long id;
 
-	@ManyToOne
-	@JoinColumn(name = "product_id", nullable = false)
-	private Product product;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id", nullable = false)
+    private Branch branch;
 
-	@Column(nullable = false)
-	@Builder.Default
-	private Integer quantity = 0;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
-	
-	private Integer lowStockAlert;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "warehouse_id")
+    private Warehouse warehouse;
 
-	private LocalDateTime lastUpdate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_variant_id")
+    private ProductVariant productVariant;
 
-	@Column(nullable = false)
-	@Builder.Default
-	private Integer reservedQuantity = 0;
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer quantity = 0;
 
-	@NotNull
-	@Column(nullable = false)
-	private Integer reorderLevel;
+    private Integer lowStockAlert;
 
-	@Transient
-	public Integer getAvailableQuantity() {
-		return Math.max(0, quantity - reservedQuantity);
-	}
+    private LocalDateTime lastUpdate;
 
-	@PrePersist
-	@PreUpdate
-	protected void onUpdate() {
-		lastUpdate = LocalDateTime.now();
-	}
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer reservedQuantity = 0;
 
-	@Transient
-	public boolean isLowStock() {
-		return getAvailableQuantity() <= reorderLevel;
-	}
+    /**
+     * @Builder.Default matters: rows created by the goods-receipt
+     * find-or-create path don't set this, and the column is NOT NULL —
+     * without the default every first receipt of a new product would fail.
+     */
+    @NotNull
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer reorderLevel = 0;
 
+    @Transient
+    public Integer getAvailableQuantity() {
+        return Math.max(0, quantity - reservedQuantity);
+    }
+
+    @Transient
+    public boolean isLowStock() {
+        return getAvailableQuantity() <= reorderLevel;
+    }
+
+    @PrePersist
+    @PreUpdate
+    protected void onUpdate() {
+        lastUpdate = LocalDateTime.now();
+    }
 }

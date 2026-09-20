@@ -5,20 +5,25 @@ import com.sh.sh.pos.system.model.products.Product;
 import com.sh.sh.pos.system.model.products.ProductBatch;
 import com.sh.sh.pos.system.model.products.ProductVariant;
 import com.sh.sh.pos.system.model.suppliers.Supplier;
+import com.sh.sh.pos.system.model.warehouses.Warehouse;
 import com.sh.sh.pos.system.payload.dto.productdto.ProductBatchDTO;
 
 public class ProductBatchMapper {
-        private ProductBatchMapper() {}
+        private ProductBatchMapper() {
+        }
+
         public static ProductBatchDTO toDTO(ProductBatch batch) {
 
                 return ProductBatchDTO.builder()
                                 .id(batch.getId())
                                 .branchId(batch.getBranch().getId())
                                 .productId(batch.getProduct().getId())
+                                .warehouseId(batch.getWarehouse() != null ? batch.getWarehouse().getId() : null)
+                                .warehouseName(batch.getWarehouse() != null ? batch.getWarehouse().getName() : null)
                                 .productName(
-                                        batch.getProduct() != null
-                                                ? batch.getProduct().getName()
-                                                : null)
+                                                batch.getProduct() != null
+                                                                ? batch.getProduct().getName()
+                                                                : null)
 
                                 .batchNo(batch.getBatchNo())
                                 .purchasePrice(batch.getPurchasePrice())
@@ -33,6 +38,7 @@ public class ProductBatchMapper {
                                 .quantity(batch.getQuantity())
                                 .remainingQuantity(batch.getRemainingQuantity())
                                 .expiryDate(batch.getExpiryDate())
+                                .manufactureDate(batch.getManufactureDate())
                                 .createdAt(batch.getCreatedAt())
                                 .variantId(
                                                 batch.getVariant() != null
@@ -52,7 +58,10 @@ public class ProductBatchMapper {
                         ProductBatchDTO dto,
                         Product product,
                         Branch branch,
-                        Supplier supplier, ProductVariant variant) {
+                        Supplier supplier,
+                        ProductVariant variant,
+                        Warehouse warehouse
+                ) {
 
                 ProductBatch batch = new ProductBatch();
 
@@ -65,6 +74,8 @@ public class ProductBatchMapper {
                 batch.setQuantity(dto.getQuantity());
                 batch.setRemainingQuantity(dto.getQuantity());
                 batch.setExpiryDate(dto.getExpiryDate());
+                batch.setManufactureDate(dto.getManufactureDate());
+                batch.setWarehouse(warehouse);
                 return batch;
         }
 

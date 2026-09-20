@@ -1,34 +1,46 @@
 package com.sh.sh.pos.system.payload.dto.inventorydto;
 
+
+
 import java.time.LocalDateTime;
 
 import com.sh.sh.pos.system.payload.dto.branchdto.BranchDTO;
 import com.sh.sh.pos.system.payload.dto.productdto.ProductDTO;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-
+@NoArgsConstructor      // REQUIRED — without it Jackson cannot deserialize
+@AllArgsConstructor     // @RequestBody InventoryDTO and POST/PUT fail
 public class InventoryDTO {
 
-	private Long id;
+    private Long id;
 
-	private BranchDTO branch;
-	private Long branchId;
+    private BranchDTO branch;
+    private Long branchId;
 
-	private ProductDTO product;
-	private Long productId;
+    private ProductDTO product;
+    private Long productId;
 
-	private Integer quantity;
-	private Integer lowStockAlert;
-	private LocalDateTime lastUpdate;
+    // ── Warehouse + variant scope ─────────────────────────────────────────
+    private Long warehouseId;
+    private String warehouseName;
+    private Long variantId;
+    private String variantName;
 
-	private Integer reservedQuantity;
+    private Integer quantity;
+    private Integer lowStockAlert;
+    private Integer reorderLevel;
+    private LocalDateTime lastUpdate;
 
-	private Integer availableQuantity;
+    private Integer reservedQuantity;
+    private Integer availableQuantity;
+    private boolean lowStock;
 
-	private boolean lowStock;
-
+    /** Optional — shown on manual adjustments, stored in the transaction ledger */
+    private String adjustmentNote;
 }

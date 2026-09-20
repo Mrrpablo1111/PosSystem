@@ -17,7 +17,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProductBatchDTO {
     private Long id;
-
+    private Long warehouseId;
+    private String warehouseName;
     private Long branchId;
 
     private Long productId;
@@ -31,10 +32,11 @@ public class ProductBatchDTO {
     private long daysLeft;
     private Integer quantity;
 
-    private Integer remainingQuantity; 
-    
+    private Integer remainingQuantity;
+
     private Long supplierId;
 
     private LocalDate expiryDate;
+    private LocalDate manufactureDate;
     private LocalDateTime createdAt;
 }

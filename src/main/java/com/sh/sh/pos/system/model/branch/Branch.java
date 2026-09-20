@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.model.branch;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sh.sh.pos.system.domain.BranchType;
@@ -52,7 +53,7 @@ public class Branch {
 
 	private String email;
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	private List<String> workingDays;
 
 	private LocalTime openTime;

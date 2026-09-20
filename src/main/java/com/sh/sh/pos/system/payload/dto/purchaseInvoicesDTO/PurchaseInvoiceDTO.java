@@ -32,6 +32,7 @@ public class PurchaseInvoiceDTO {
     private Long purchaseOrderId;
     private String supplierInvoiceNo;
     private String invoiceNumber;
+    private String purchaseOrderNumber;
 
     @NotNull(message = "Invoice date is required")
     private LocalDate invoiceDate;

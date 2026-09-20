@@ -9,18 +9,19 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor 
+@NoArgsConstructor
 @AllArgsConstructor
 public class CurrencyRequestDTO {
-     @NotBlank(message = "Code is required")
+    @NotBlank(message = "Code is required")
     @Size(max = 10, message = "Code must be at most 10 characters")
-    private String code;   // e.g. "USD"
- 
+    private String code; // e.g. "USD"
+
     @NotBlank(message = "Name is required")
-    private String name;   // e.g. "US Dollar"
- 
+    private String name; // e.g. "US Dollar"
+
     @NotBlank(message = "Symbol is required")
     private String symbol; // e.g. "$"
- 
+
+    @Builder.Default
     private Boolean active = true;
 }

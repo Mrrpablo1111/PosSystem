@@ -42,33 +42,21 @@ public class RedisEmailQueueServiceImpl implements EmailService {
 
     // ── Shared HTML fragments (S1192) ─────────────────────────────────────
 
-    private static final String HTML_HEAD_OPEN =
-            "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
-    private static final String STYLE_BODY_BASE =
-            "<style>body{font-family:Arial,sans-serif;color:#333;font-size:14px}";
-    private static final String CSS_WRAP_600 =
-            ".wrap{max-width:600px;margin:0 auto;padding:24px}";
-    private static final String CSS_WRAP_680 =
-            ".wrap{max-width:680px;margin:0 auto;padding:24px}";
-    private static final String CSS_HDR_GREEN =
-            ".hdr{background:#10b981;color:white;padding:20px 24px;border-radius:8px 8px 0 0}";
-    private static final String CSS_BODY_PANEL =
-            ".body{background:#f9fafb;padding:24px;border:1px solid #e5e7eb}";
-    private static final String CSS_FOOTER_CLOSE_HEAD =
-            ".footer{text-align:center;font-size:11px;color:#9ca3af;padding:16px}</style></head>";
-    private static final String BODY_WRAP_OPEN =
-            "<body><div class='wrap'>";
-    private static final String DIV_BODY_OPEN =
-            "<div class='body'>";
-    private static final String TD_PADDING =
-            "<tr><td style='padding:8px'>";
-    private static final String TD_CLOSE_TD_PADDING =
-            "</td><td style='padding:8px'>";
+    private static final String HTML_HEAD_OPEN = "<!DOCTYPE html><html><head><meta charset='UTF-8'>";
+    private static final String STYLE_BODY_BASE = "<style>body{font-family:Arial,sans-serif;color:#333;font-size:14px}";
+    private static final String CSS_WRAP_600 = ".wrap{max-width:600px;margin:0 auto;padding:24px}";
+    private static final String CSS_WRAP_680 = ".wrap{max-width:680px;margin:0 auto;padding:24px}";
+    private static final String CSS_HDR_GREEN = ".hdr{background:#10b981;color:white;padding:20px 24px;border-radius:8px 8px 0 0}";
+    private static final String CSS_BODY_PANEL = ".body{background:#f9fafb;padding:24px;border:1px solid #e5e7eb}";
+    private static final String CSS_FOOTER_CLOSE_HEAD = ".footer{text-align:center;font-size:11px;color:#9ca3af;padding:16px}</style></head>";
+    private static final String BODY_WRAP_OPEN = "<body><div class='wrap'>";
+    private static final String DIV_BODY_OPEN = "<div class='body'>";
+    private static final String TD_PADDING = "<tr><td style='padding:8px'>";
+    private static final String TD_CLOSE_TD_PADDING = "</td><td style='padding:8px'>";
     private static final String TD_CLOSE = "</td>";
     private static final String TD_TR_CLOSE = "</td></tr>";
     private static final String STRONG_COMMA_P = "</strong>,</p>";
-    private static final String FOOTER_EMAIL_FROM =
-            "</div><div class='footer'>Automated email from ";
+    private static final String FOOTER_EMAIL_FROM = "</div><div class='footer'>Automated email from ";
     private static final String CLOSE_HTML = ".</div></div></body></html>";
 
     @Value("${app.mail.from-name:SH-POS System}")
@@ -369,7 +357,8 @@ public class RedisEmailQueueServiceImpl implements EmailService {
                 .append("<p>Please find below our purchase order. A PDF copy is attached for your records.</p>");
         sb.append("<table><tr>")
                 .append("<td><strong>PO Number</strong><br>").append(order.getPoNumber()).append(TD_CLOSE)
-                .append("<td><strong>Order Date</strong><br>").append(order.getOrderDate().format(FMT)).append(TD_CLOSE);
+                .append("<td><strong>Order Date</strong><br>").append(order.getOrderDate().format(FMT))
+                .append(TD_CLOSE);
         if (order.getExpectedDelivery() != null) {
             sb.append("<td><strong>Expected Delivery</strong><br>").append(order.getExpectedDelivery().format(FMT))
                     .append(TD_CLOSE);
@@ -497,5 +486,81 @@ public class RedisEmailQueueServiceImpl implements EmailService {
 
     private boolean gt0(BigDecimal v) {
         return v != null && v.compareTo(BigDecimal.ZERO) > 0;
+    }
+
+    @Override
+    public void sendOutstandingItemsReminderEmail(PurchaseOrder order) {
+        if (order.getSupplier() == null || order.getSupplier().getEmail() == null
+                || order.getSupplier().getEmail().isBlank()) {
+            log.warn("Cannot send outstanding-items reminder for PO {}: supplier has no email",
+                    order.getPoNumber());
+            return;
+        }
+
+        StringBuilder rows = new StringBuilder();
+        int outstandingLines = 0;
+
+        for (var item : order.getItems()) {
+            int ordered = item.getRequestedQuantity() != null ? item.getRequestedQuantity() : 0;
+            int received = item.getReceivedQuantity() != null ? item.getReceivedQuantity() : 0;
+            int remaining = ordered - received;
+            if (remaining <= 0)
+                continue;
+
+            outstandingLines++;
+            String productName = item.getProduct() != null ? item.getProduct().getName() : "—";
+            String variantName = item.getVariant() != null ? item.getVariant().getName() : "";
+
+            rows.append("<tr>")
+                    .append("<td style='padding:8px;border-bottom:1px solid #eee;'>")
+                    .append(productName)
+                    .append(variantName.isBlank() ? "" : " <span style='color:#888;'>(" + variantName + ")</span>")
+                    .append("</td>")
+                    .append("<td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>").append(ordered)
+                    .append("</td>")
+                    .append("<td style='padding:8px;border-bottom:1px solid #eee;text-align:center;'>").append(received)
+                    .append("</td>")
+                    .append("<td style='padding:8px;border-bottom:1px solid #eee;text-align:center;font-weight:bold;color:#c0392b;'>")
+                    .append(remaining)
+                    .append("</td>")
+                    .append("</tr>");
+        }
+
+        if (outstandingLines == 0) {
+            log.info("No outstanding items on PO {} — reminder not sent", order.getPoNumber());
+            return;
+        }
+
+        String storeName = (order.getBranch() != null && order.getBranch().getStore() != null)
+                ? order.getBranch().getStore().getBrand()
+                : "Purchasing Team";
+
+        String html = """
+                <div style='font-family:Arial,sans-serif;max-width:600px;margin:0 auto;'>
+                  <h2 style='color:#2c3e50;'>Outstanding Items Reminder</h2>
+                  <p>Dear %s,</p>
+                  <p>This is a reminder that the following items from purchase order
+                     <strong>%s</strong> are still outstanding. Please arrange delivery
+                     of the remaining quantities at your earliest convenience.</p>
+                  <table style='width:100%%;border-collapse:collapse;margin-top:16px;'>
+                    <thead>
+                      <tr style='background:#f5f5f5;'>
+                        <th style='padding:8px;text-align:left;'>Product</th>
+                        <th style='padding:8px;text-align:center;'>Ordered</th>
+                        <th style='padding:8px;text-align:center;'>Received</th>
+                        <th style='padding:8px;text-align:center;'>Remaining</th>
+                      </tr>
+                    </thead>
+                    <tbody>%s</tbody>
+                  </table>
+                  <p style='margin-top:16px;color:#555;'>Thank you,<br/>%s</p>
+                </div>
+                """.formatted(order.getSupplier().getName(), order.getPoNumber(), rows.toString(), storeName);
+
+        sendEmail(order.getSupplier().getEmail(),
+                "Outstanding Items Reminder — " + order.getPoNumber(), html);
+
+        log.info("Outstanding-items reminder sent for PO {} ({} lines)",
+                order.getPoNumber(), outstandingLines);
     }
 }

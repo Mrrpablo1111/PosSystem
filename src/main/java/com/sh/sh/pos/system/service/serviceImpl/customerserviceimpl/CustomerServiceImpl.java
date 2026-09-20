@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.service.serviceimpl.customerserviceimpl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.mapper.customermapper.CustomerMapper;
@@ -17,19 +18,15 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CustomerServiceImpl implements CustomerService{
-	  private final CustomerRepository customerRepository;
+public class CustomerServiceImpl implements CustomerService {
+
+    private final CustomerRepository customerRepository;
     private final PriceGroupRepository priceGroupRepository;
 
     @Override
+    @Transactional
     public CustomerDTO createCustomer(CustomerDTO dto) {
-
-        PriceGroup priceGroup = null;
-
-        if (dto.getPriceGroupId() != null) {
-            priceGroup = priceGroupRepository.findById(dto.getPriceGroupId())
-                    .orElseThrow(() -> new RuntimeException("Price group not found"));
-        }
+        PriceGroup priceGroup = resolvePriceGroup(dto.getPriceGroupId());
 
         Customer customer = CustomerMapper.toEntity(dto, priceGroup);
 
@@ -37,41 +34,27 @@ public class CustomerServiceImpl implements CustomerService{
     }
 
     @Override
-    public CustomerDTO updateCustomer(Long id, CustomerDTO dto) throws ResourceNotFoundException {
-
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
+    @Transactional
+    public CustomerDTO updateCustomer(Long id, CustomerDTO dto) {
+        Customer customer = findCustomerOrThrow(id);
 
         customer.setEmail(dto.getEmail());
         customer.setFullName(dto.getFullName());
         customer.setPhone(dto.getPhone());
-
-        if (dto.getPriceGroupId() != null) {
-            PriceGroup priceGroup = priceGroupRepository.findById(dto.getPriceGroupId())
-                    .orElseThrow(() -> new RuntimeException("Price group not found"));
-
-            customer.setPriceGroup(priceGroup);
-        } else {
-            customer.setPriceGroup(null);
-        }
+        customer.setPriceGroup(resolvePriceGroup(dto.getPriceGroupId()));
 
         return CustomerMapper.toDTO(customerRepository.save(customer));
     }
 
     @Override
-    public void deleteCustomer(Long id) throws ResourceNotFoundException {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found " + id));
-
-        customerRepository.delete(customer);
+    @Transactional
+    public void deleteCustomer(Long id) {
+        customerRepository.delete(findCustomerOrThrow(id));
     }
 
     @Override
-    public CustomerDTO getCustomerById(Long id) throws ResourceNotFoundException {
-        Customer customer = customerRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + id));
-
-        return CustomerMapper.toDTO(customer);
+    public CustomerDTO getCustomerById(Long id) {
+        return CustomerMapper.toDTO(findCustomerOrThrow(id));
     }
 
     @Override
@@ -89,5 +72,22 @@ public class CustomerServiceImpl implements CustomerService{
                 .stream()
                 .map(CustomerMapper::toDTO)
                 .toList();
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+
+    private Customer findCustomerOrThrow(Long id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Customer not found with id: " + id));
+    }
+
+    private PriceGroup resolvePriceGroup(Long priceGroupId) {
+        if (priceGroupId == null) {
+            return null;
+        }
+        return priceGroupRepository.findById(priceGroupId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Price group not found with id: " + priceGroupId));
     }
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.domain.StockMovementType;
 import com.sh.sh.pos.system.mapper.stockmovementmapper.StockMovementMapper;
@@ -21,7 +22,7 @@ import com.sh.sh.pos.system.repository.stockmovementrepository.StockMovementRepo
 import com.sh.sh.pos.system.service.stockmovementservice.StockMovementService;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
