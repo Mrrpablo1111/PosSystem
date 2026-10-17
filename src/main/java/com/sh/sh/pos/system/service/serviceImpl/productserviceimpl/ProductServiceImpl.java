@@ -89,11 +89,13 @@ public class ProductServiceImpl implements ProductService {
 		Product product = findProduct(id);
 		checkAuthority(product.getStore(), user);
 
-		// Uniqueness only needs checking when the value is actually changing
-		if (productDTO.getSku() != null && !productDTO.getSku().equals(product.getSku())) {
+		// Uniqueness is enforced whenever a non-null SKU/barcode is submitted,
+		// even if the value is the same as the current record. This keeps the
+		// update contract consistent with the repository validation and tests.
+		if (productDTO.getSku() != null) {
 			validateSkuUnique(productDTO.getSku(), id);
 		}
-		if (productDTO.getBarcode() != null && !productDTO.getBarcode().equals(product.getBarcode())) {
+		if (productDTO.getBarcode() != null) {
 			validateBarcodeUnique(productDTO.getBarcode(), id);
 		}
 

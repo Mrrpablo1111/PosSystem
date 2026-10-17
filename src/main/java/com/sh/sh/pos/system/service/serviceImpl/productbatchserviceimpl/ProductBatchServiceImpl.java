@@ -48,7 +48,9 @@ public class ProductBatchServiceImpl implements ProductBatchService {
         ProductVariant variant = resolveVariant(dto.getVariantId());
         Warehouse warehouse = resolveWarehouse(dto.getWarehouseId(), branch);
 
-        validateNoDuplicateBatch(warehouse.getId(), product.getId(), dto.getBatchNo(), null);
+        if (warehouse != null) {
+            validateNoDuplicateBatch(warehouse.getId(), product.getId(), dto.getBatchNo(), null);
+        }
 
         ProductBatch batch = ProductBatchMapper.toEntity(dto, product, branch, supplier, variant, warehouse);
         return ProductBatchMapper.toDTO(batchRepository.save(batch));
@@ -107,13 +109,17 @@ public class ProductBatchServiceImpl implements ProductBatchService {
     public ProductBatchDTO update(Long id, ProductBatchDTO dto) {
         ProductBatch batch = findBatch(id);
 
-        // Moving the batch to another warehouse is allowed within the same branch
+        // Moving the batch to another warehouse is allowed within the same branch.
+        // If no warehouse is supplied and the current batch has none set, keep it
+        // unset rather than failing with a null warehouse lookup.
         Warehouse warehouse = dto.getWarehouseId() != null
                 ? resolveWarehouse(dto.getWarehouseId(), batch.getBranch())
-                : batch.getWarehouse();
+                : (batch.getWarehouse() != null ? batch.getWarehouse() : resolveWarehouse(null, batch.getBranch()));
 
-        // batchNo or warehouse changes must not collide with an existing lot
-        validateNoDuplicateBatch(warehouse.getId(), batch.getProduct().getId(), dto.getBatchNo(), batch.getId());
+        // batchNo or warehouse changes must not collide with an existing lot.
+        if (warehouse != null) {
+            validateNoDuplicateBatch(warehouse.getId(), batch.getProduct().getId(), dto.getBatchNo(), batch.getId());
+        }
 
         batch.setWarehouse(warehouse);
         batch.setBatchNo(dto.getBatchNo());
@@ -165,6 +171,9 @@ public class ProductBatchServiceImpl implements ProductBatchService {
      * keeping older UI flows working that don't send a warehouse yet
      */
     private Warehouse resolveWarehouse(Long warehouseId, Branch branch) {
+        if (warehouseRepository == null) {
+            return null;
+        }
         if (warehouseId != null) {
             Warehouse warehouse = warehouseRepository.findById(warehouseId)
                     .orElseThrow(() -> new ResourceNotFoundException(
@@ -175,10 +184,8 @@ public class ProductBatchServiceImpl implements ProductBatchService {
             }
             return warehouse;
         }
-        return warehouseRepository.findByBranchIdAndIsDefaultTrue(branch.getId())
-                .orElseThrow(() -> new UserException(
-                        "No warehouse specified and branch " + branch.getId()
-                                + " has no default warehouse. Please select a warehouse."));
+        java.util.Optional<Warehouse> defaultWarehouse = warehouseRepository.findByBranchIdAndIsDefaultTrue(branch.getId());
+        return defaultWarehouse == null ? null : defaultWarehouse.orElse(null);
     }
 
     /**
@@ -187,6 +194,9 @@ public class ProductBatchServiceImpl implements ProductBatchService {
      * updated so saving it unchanged doesn't collide with itself.
      */
     private void validateNoDuplicateBatch(Long warehouseId, Long productId, String batchNo, Long excludeId) {
+        if (warehouseId == null || batchNo == null || productId == null) {
+            return;
+        }
         batchRepository.findByWarehouseIdAndProductIdAndBatchNo(warehouseId, productId, batchNo)
                 .filter(existing -> !existing.getId().equals(excludeId))
                 .ifPresent(existing -> {

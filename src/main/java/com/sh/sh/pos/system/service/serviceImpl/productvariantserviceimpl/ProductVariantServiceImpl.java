@@ -63,11 +63,11 @@ public class ProductVariantServiceImpl implements ProductVariantService {
         ProductVariant variant = findVariantOrThrow(id);
         if (dto.getSku() != null && !dto.getSku().equals(variant.getSku())
                 && variantRepository.existsBySku(dto.getSku())) {
-            throw new UserException("SKU '" + dto.getSku() + "' is already in use.");
+            throw new UserException(SKU_EXISTS);
         }
         if (dto.getBarcode() != null && !dto.getBarcode().equals(variant.getBarcode())
                 && variantRepository.existsByBarcode(dto.getBarcode())) {
-            throw new UserException("Barcode '" + dto.getBarcode() + "' is already assigned to another variant.");
+            throw new UserException(BARCODE_EXISTS);
         }
         ProductVariantMapper.applyTo(variant, dto);
         return ProductVariantMapper.toDTO(variantRepository.save(variant));
@@ -82,6 +82,9 @@ public class ProductVariantServiceImpl implements ProductVariantService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductVariantDTO> getByProduct(Long productId) {
+        if (!productRepository.existsById(productId)) {
+            throw new ResourceNotFoundException("Product not found with id: " + productId);
+        }
         return ProductVariantMapper.toDTOList(
                 variantRepository.findByProductIdWithValues(productId)); // ← was findByProductId
     }

@@ -6,7 +6,7 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 
 # ── Stage 1: Build ────────────────────────────────────────────────────────────
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM eclipse-temurin:25-jdk-alpine AS build
 WORKDIR /app
 
 # Copy Maven wrapper and pom first — cached layer, only re-runs if pom changes
@@ -19,7 +19,7 @@ COPY src ./src
 RUN ./mvnw clean package -DskipTests -B
 
 # ── Stage 2: Run ──────────────────────────────────────────────────────────────
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 
 # Security — run as non-root user
