@@ -8,10 +8,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -20,15 +18,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
-@Table(name="users")
+@Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-
-
 public class User {
-    
+
+    public User() {
+        this.verified = Boolean.FALSE;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,19 +39,24 @@ public class User {
     @Email(message = "Email should be valid")
     private String email;
     private String password;
-    @ManyToOne
-    private Store store;
-    
-    @ManyToOne 
-    private Branch branch; 
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private Store store;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+    @Column(unique = true)
     private String phone;
 
+    
     @Column(nullable = false)
     @NotNull(message = "Role is mandatory")
+    @Enumerated(EnumType.STRING)
     private UserRole role;
-    
-   
+
     @Column(nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -62,10 +65,17 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @NotNull
     @Column(nullable = false)
-    private Boolean verified = false;
+    private Boolean verified;
 
     private LocalDateTime lastLogin;
 
+    @PrePersist
+    public void prePersist() {
+        if (verified == null) {
+            verified = false;
+        }
+    }
 
 }
