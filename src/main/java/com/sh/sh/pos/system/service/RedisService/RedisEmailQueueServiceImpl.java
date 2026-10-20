@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.sh.sh.pos.system.configuration.emailtemplate.EmailTemplateBuilder;
 import com.sh.sh.pos.system.domain.EmailType;
 import com.sh.sh.pos.system.model.poemaillogs.POEmailLog;
 import com.sh.sh.pos.system.model.products.ProductBatch;
@@ -33,6 +34,7 @@ public class RedisEmailQueueServiceImpl implements EmailService {
     private final RedisTemplate<String, EmailDTO> redisTemplate;
     private final POEmailLogRepository emailLogRepository;
     private final PurchaseOrderRepository purchaseOrderRepository;
+    private final EmailTemplateBuilder emailTemplateBuilder;
 
     private static final String STATUS_SUCCESS = "SUCCESS";
     private static final String STATUS_FAILED = "FAILED";
@@ -65,10 +67,12 @@ public class RedisEmailQueueServiceImpl implements EmailService {
     public RedisEmailQueueServiceImpl(
             @Qualifier("emailRedisTemplate") RedisTemplate<String, EmailDTO> redisTemplate,
             POEmailLogRepository emailLogRepository,
-            PurchaseOrderRepository purchaseOrderRepository) {
+            PurchaseOrderRepository purchaseOrderRepository,
+            EmailTemplateBuilder emailTemplateBuilder) {
         this.redisTemplate = redisTemplate;
         this.emailLogRepository = emailLogRepository;
         this.purchaseOrderRepository = purchaseOrderRepository;
+        this.emailTemplateBuilder = emailTemplateBuilder;
     }
 
     // ── Generic send ──────────────────────────────────────────────────────
@@ -563,4 +567,36 @@ public class RedisEmailQueueServiceImpl implements EmailService {
         log.info("Outstanding-items reminder sent for PO {} ({} lines)",
                 order.getPoNumber(), outstandingLines);
     }
+
+    @Override
+    public void sendPasswordResetOtpEmail(String to, String name, String otp) {
+        String subject = "SH POS - Password Reset OTP";
+        String html = emailTemplateBuilder.buildPasswordResetOtpEmail(name, otp);
+        sendEmail(to, subject, html);
+    }
+
+    @Override
+    public void sendVerificationOtpEmail(
+            String to,
+            String name,
+            String otp) {
+
+        if (to == null || to.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Recipient email is required");
+        }
+
+        if (otp == null || !otp.matches("\\d{6}")) {
+            throw new IllegalArgumentException(
+                    "Verification OTP must contain exactly 6 digits");
+        }
+
+
+        String subject = "SH-POS - Verify Your Account";
+
+        String html = emailTemplateBuilder.buildVerificationOtpEmail(name, otp);
+
+        sendEmail(to, subject, html);
+    }
+
 }

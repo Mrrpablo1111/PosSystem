@@ -1,8 +1,11 @@
 package com.sh.sh.pos.system.payload.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
 public class ForgotPasswordRequest {
-    private String email;
+
+    @NotBlank(message = "Email or phone number is required")
+    private String identifier;
 }

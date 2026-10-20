@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,7 +82,9 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     @Override
     @Transactional(readOnly = true)
     public GoodsReceiptDTO getGoodsReceiptById(Long id) {
-        return mapper.toDto(findGoodsReceiptOrThrow(id));
+
+        GoodsReceipt grn = findGoodsReceiptOrThrow(id);
+        return mapper.toDto(grn);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -91,12 +94,16 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     @Override
     @Transactional
     public GoodsReceiptDTO createGoodsReceipt(GoodsReceiptCreateDTO dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("Goods recepit data is request");
+        }
+
         PurchaseOrder po = findPurchaseOrderOrThrow(dto.getPurchaseOrderId());
         Warehouse warehouse = findWarehouseOrThrow(dto.getWarehouseId());
 
         // Header validation
         validator.validatePurchaseOrderReceivable(po);
-        validator.validateSupplierMatches(po, po.getSupplier().getId());
+        // validator.validateSupplierMatches(po, po.getSupplier().getId());
         // Item validation (belongs to PO, quantities, batch rules)
         validator.validateItems(po, dto.getItems());
 
@@ -120,6 +127,10 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     @Override
     @Transactional
     public GoodsReceiptDTO updateGoodsReceipt(Long id, GoodsReceiptUpdateDTO dto) {
+
+        if (dto == null) {
+            throw new IllegalArgumentException("Goods receipt update data is required");
+        }
         GoodsReceipt grn = findGoodsReceiptOrThrow(id);
         validator.validateEditable(grn);
 
@@ -127,9 +138,12 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
         validator.validatePurchaseOrderReceivable(po);
         validator.validateItems(po, dto.getItems());
 
-        grn.setWarehouse(findWarehouseOrThrow(dto.getWarehouseId()));
-        if (dto.getReceivedDate() != null)
+        Warehouse warehouse = findWarehouseOrThrow(dto.getWarehouseId());
+
+        grn.setWarehouse(warehouse);
+        if (dto.getReceivedDate() != null) {
             grn.setReceivedDate(dto.getReceivedDate());
+        }
         grn.setNote(dto.getNote());
 
         // Replace items wholesale (orphanRemoval deletes the old rows)
@@ -170,20 +184,27 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     public GoodsReceiptDTO completeGoodsReceipt(Long id) {
         GoodsReceipt grn = findGoodsReceiptOrThrow(id);
         validator.validateCanComplete(grn);
-        validator.validatePurchaseOrderReceivable(grn.getPurchaseOrder());
+        PurchaseOrder po = grn.getPurchaseOrder();
+        validator.validatePurchaseOrderReceivable(po);
         // Guard against a concurrent receipt completing first and shrinking "remaining"
         validator.validateRemainingAtCompletion(grn);
 
         // 1. Update PO item quantities
-        grn.getItems().forEach(this::applyToPurchaseOrderItem);
-
+        for (GoodsReceiptItem item : grn.getItems()) {
+            applyToPurchaseOrderItem(item);
+        }
         // 2. Roll PO status up from its items
-        updatePurchaseOrderStatus(grn.getPurchaseOrder());
+        updatePurchaseOrderStatus(po);
 
         // 3. Post accepted stock to inventory (batch + transaction + quantity)
-        grn.getItems().stream()
-                .filter(item -> item.getAcceptedQuantity() != null && item.getAcceptedQuantity() > 0)
-                .forEach(item -> postToInventory(grn, item));
+
+        for (GoodsReceiptItem item : grn.getItems()) {
+            int accepted = nz(item.getAcceptedQuantity());
+            if (accepted <= 0) {
+                continue;
+            }
+            postToInventory(grn, item);
+        }
 
         grn.setStatus(GoodsReceiptStatus.COMPLETED);
         return mapper.toDto(goodsReceiptRepository.save(grn));
@@ -267,9 +288,13 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
 
     private void applyToPurchaseOrderItem(GoodsReceiptItem item) {
         PurchaseOrderItem poItem = item.getPurchaseOrderItem();
+        int previousReceived = nz(poItem.getReceivedQuantity());
+        int currentReceived = nz(item.getReceivedQuantity());
+        int requested = nz(poItem.getRequestedQuantity());
         int newReceived = nz(poItem.getReceivedQuantity()) + nz(item.getReceivedQuantity());
+        int remaining = Math.max(0, requested - newReceived);
         poItem.setReceivedQuantity(newReceived);
-        poItem.setRemainingQuantity(Math.max(0, nz(poItem.getRequestedQuantity()) - newReceived));
+        poItem.setRemainingQuantity(remaining);
         purchaseOrderItemRepository.save(poItem);
     }
 
@@ -292,11 +317,12 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
     // ═══════════════════════════════════════════════════════════════════════
 
     private void postToInventory(GoodsReceipt grn, GoodsReceiptItem item) {
-        int accepted = item.getAcceptedQuantity();
+        int accepted = nz(item.getAcceptedQuantity());
+        if (accepted <= 0) { return; }
 
         // 1. Product batch — only for batch-tracked lines.
-        //    ProductBatch.expiryDate is NOT NULL, so lines without an expiry
-        //    (non-perishables) skip the batch and still post to inventory.
+        // ProductBatch.expiryDate is NOT NULL, so lines without an expiry
+        // (non-perishables) skip the batch and still post to inventory.
         if (isBatchTracked(item)) {
             upsertProductBatch(grn, item, accepted);
         }
@@ -326,8 +352,9 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
                         .warehouse(grn.getWarehouse())
                         .quantity(0)
                         .build());
-
-        inventory.setQuantity(nz(inventory.getQuantity()) + accepted);
+            
+        int currentQuantity = nz( inventory.getQuantity() );
+        inventory.setQuantity( currentQuantity + accepted );
         inventoryRepository.save(inventory);
     }
 
@@ -387,14 +414,16 @@ public class GoodsReceiptServiceImpl implements GoodsReceiptService {
                 .orElseThrow(() -> new ResourceNotFoundException(WAREHOUSE_NOT_FOUND + id));
     }
 
-    /** Resolves the authenticated user; null when unauthenticated (e.g. system jobs). */
+    /**
+     * Resolves the authenticated user; null when unauthenticated (e.g. system
+     * jobs).
+     */
     private User currentUserOrNull() {
-        try {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            return userRepository.findByEmail(username); // repository returns User (or null) directly
-        } catch (Exception e) {
-            return null;
-        }
+        Authentication authentication = SecurityContextHolder .getContext() .getAuthentication();
+        if (authentication == null) { return null; } 
+        if (!authentication.isAuthenticated()) { return null; }
+       String username = authentication.getName(); if (username == null || username.isBlank() || "anonymousUser".equals(username)) { return null; }
+       return userRepository .findByEmail(username) .orElse(null);
     }
 
     private static int nz(Integer v) {

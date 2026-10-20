@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.payload.dto.storedto;
 import java.time.LocalDateTime;
 
 import com.sh.sh.pos.system.domain.StoreStatus;
+import com.sh.sh.pos.system.model.store.StoreType;
 import com.sh.sh.pos.system.model.storecontact.StoreContact;
 import com.sh.sh.pos.system.payload.dto.userdto.UserDTO;
 
@@ -20,7 +21,12 @@ public class StoreDTO {
 	private Long id;
 	private String brand;
 	private String description;
-	private String storeType;
+
+	// dynamic storeType
+	private Long storeTypeId;
+	private String storeTypeName;
+
+
 	private StoreStatus status;
 	private StoreContact contact;
 

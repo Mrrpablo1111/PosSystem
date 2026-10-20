@@ -7,7 +7,9 @@ import com.sh.sh.pos.system.model.user.User;
 import com.sh.sh.pos.system.payload.dto.storedto.StoreDTO;
 
 public class StoreMapper {
-    private StoreMapper() {}
+    private StoreMapper() {
+    }
+
     public static StoreDTO toDTO(Store store) {
         if (store == null)
             return null;
@@ -18,7 +20,8 @@ public class StoreMapper {
                 .storeAdmin(store.getStoreAdmin() != null
                         ? UserMapper.toDTO(store.getStoreAdmin())
                         : null)
-                .storeType(store.getStoreType())
+                .storeTypeId(store.getStoreType() != null ? store.getStoreType().getId() : null)
+                .storeTypeName(store.getStoreType() != null ? store.getStoreType().getName() : null)
                 .description(store.getDescription())
                 .contact(store.getContact())
                 .createdAt(store.getCreatedAt())
@@ -35,26 +38,32 @@ public class StoreMapper {
         return Store.builder()
                 .brand(storeDTO.getBrand())
                 .storeAdmin(storeAdmin)
-                .storeType(storeDTO.getStoreType())
                 .contact(storeDTO.getContact())
                 .description(storeDTO.getDescription())
                 .build();
     }
 
     public static void updateEntity(Store store, StoreDTO storeDTO) {
-        if (storeDTO.getBrand() != null)
+        if(store == null || storeDTO == null){
+            return;
+        }
+        if(storeDTO.getBrand() != null){
             store.setBrand(storeDTO.getBrand());
-        if (storeDTO.getDescription() != null)
+        }
+        if (storeDTO.getDescription() != null) {
             store.setDescription(storeDTO.getDescription());
-        if (storeDTO.getStoreType() != null)
-            store.setStoreType(storeDTO.getStoreType());
+        }
 
         if (storeDTO.getContact() != null) {
-            store.setContact(StoreContact.builder()
+
+            StoreContact contact = StoreContact.builder()
                     .address(storeDTO.getContact().getAddress())
                     .phone(storeDTO.getContact().getPhone())
                     .email(storeDTO.getContact().getEmail())
-                    .build());
+                    .build();
+
+            store.setContact(contact);
         }
+
     }
 }

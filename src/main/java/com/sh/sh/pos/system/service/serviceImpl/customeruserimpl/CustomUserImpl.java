@@ -2,43 +2,65 @@ package com.sh.sh.pos.system.service.serviceimpl.customeruserimpl;
 
 import com.sh.sh.pos.system.model.user.User;
 import com.sh.sh.pos.system.repository.userrepository.UserRepository;
+import com.sh.sh.pos.system.security.UserPrincipal;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-
-import java.util.Collection;
-import java.util.Collections;
-
 @Service
 @RequiredArgsConstructor
 public class CustomUserImpl implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
 
-        User user = userRepository.findByEmail(username);
-        if(user == null){
-            throw new UsernameNotFoundException("user not found with Email: " + username);
+        if (identifier == null || identifier.isBlank()) {
+            throw new UsernameNotFoundException("Email or phone number is required");
         }
 
-        GrantedAuthority authority = new SimpleGrantedAuthority(
-                user.getRole().toString()
-        );
+        String value = identifier.trim();
 
-        Collection<GrantedAuthority> authorities = Collections.singletonList(authority);
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(), user.getPassword(), authorities
-        );
+        User user;
+
+        if (value.contains("@")) {
+
+            String email = value.toLowerCase();
+            user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(
+                    "Invalid email or phone number"));
+        } else {
+            String phone = normalizePhone(value);
+            user = userRepository.findByPhone(phone).orElseThrow(
+                    () -> new UsernameNotFoundException("Invalid email or phone number"));
+        }
+
+        if (user.getRole() == null) {
+            throw new UsernameNotFoundException("User role is not assignt");
+        }
+
+        return new UserPrincipal(user);
+    }
+
+    private String normalizePhone(String phone) {
+        String value = phone.trim();
+
+        value = value.replaceAll("\\s+", "");
+
+        value = value.replace("-", "");
+
+        // Cambodia local format
+        if (value.startsWith("0")) {
+            value = "+855" + value.substring(1);
+        }
+
+        if (value.startsWith("855")) {
+            value = "+" + value;
+        }
+        return value;
     }
 }

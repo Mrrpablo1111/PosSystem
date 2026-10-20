@@ -20,8 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 
 public class RefreshTokenRedisService {
 
-    private final RedisTemplate<String, UserSession> redisTemplate;
     private static final String REFRESH_PREFIX = "refresh:";
+    private static final String DEFAULT_DEVICE_ID = "WEB";
+    private final RedisTemplate<String, UserSession> redisTemplate;
 
     public RefreshTokenRedisService(
             @Qualifier("sessionRedisTemplate") RedisTemplate<String, UserSession> redisTemplate) {
@@ -52,13 +53,25 @@ public class RefreshTokenRedisService {
             String refreshToken,
             long expirationMillis) {
 
-        String key = buildKey(email, deviceId);
+        String normalizedEmail = normalizeEmail(email);
+        String normalizedDeviceId = normalizeDeviceId(deviceId);
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new IllegalArgumentException("Refresh token cannot be null or blank");
+        }
+        if (expirationMillis <= 0) {
+            throw new IllegalArgumentException("Expiration time must be greater than zero");
+        }
+
+        String normalizedToken = refreshToken.trim();
+
+        String key = buildKey(normalizedEmail, normalizedDeviceId);
 
         UserSession session = new UserSession();
-        session.setRefreshToken(refreshToken);
-        session.setDeviceId(normalize(deviceId));
-        session.setRole(role);
-        session.setIp(ip);
+        session.setRefreshToken(normalizedToken);
+        session.setDeviceId(normalize(normalizedDeviceId));
+        session.setRole(role == null || role.isBlank() ? "UNKNOWN" : role.trim());
+        session.setIp(ip == null || ip.isBlank() ? "UNKNOWN" : ip.trim());
         session.setLoginTime(LocalDateTime.now());
 
         redisTemplate.opsForValue().set(key, session, Duration.ofMillis(expirationMillis));
@@ -70,40 +83,93 @@ public class RefreshTokenRedisService {
     // VALIDATION
     // =========================
     public boolean isValid(String email, String deviceId, String refreshToken) {
-        UserSession session = getSession(email, deviceId);
- 
-        if (session == null) {
-            log.warn("⚠️  Session not found → email={} device={}", email, normalize(deviceId));
+
+        String normalizedEmail = normalizeEmail(email);
+        String normalizedDeviceId = normalizeDeviceId(deviceId);
+
+        if (refreshToken == null || refreshToken.isBlank()) {
+            log.warn("Refresh Token missing -> email={} device={}", normalizedEmail, normalizedDeviceId);
             return false;
         }
- 
-        boolean valid = session.getRefreshToken().equals(refreshToken);
-        if (!valid) {
-            log.warn("⚠️  Token mismatch → email={} device={}", email, normalize(deviceId));
+
+        String normalizedToken = refreshToken.trim();
+
+        UserSession session = getSession(email, deviceId);
+        if (session == null) {
+            log.warn("⚠️  Session not found → email={} device={}", normalizedEmail, normalizedDeviceId);
+            return false;
         }
-        return valid;
+
+        String storedToken = session.getRefreshToken();
+        if (storedToken == null || storedToken.isBlank()) {
+            log.warn("Refresh session has no token -> email={} device={}", normalizedEmail, normalizedDeviceId);
+            return false;
+        }
+
+       boolean valid = storedToken.equals(normalizedToken);
+
+        if (!valid) {
+            log.warn("Refresh token mismatch → email={} device={}", normalizedEmail, normalizedDeviceId);
+            return false;
+        }
+        log.debug("Refresh token valid → email={} device={}", normalizedEmail, normalizedDeviceId);
+        return true;
     }
+
     // =========================
     // GET SESSION
     // =========================
-   public UserSession getSession(String email, String deviceId) {
-        return redisTemplate.opsForValue().get(buildKey(email, deviceId));
+    public UserSession getSession(String email, String deviceId) {
+
+        String normalizedEmail = normalizeEmail(email);
+        String normalizedDeviceId = normalizeDeviceId(deviceId);
+
+        String key = buildKey(normalizedEmail, normalizedDeviceId);
+
+        return redisTemplate.opsForValue().get(key);
+    }
+
+    public String getRefreshToken(String email, String deviceId) {
+        UserSession session = getSession(email, deviceId);
+        if (session == null) {
+            return null;
+        }
+
+        return session.getRefreshToken();
     }
 
     // =========================
     // DELETE SESSION (LOGOUT)
     // =========================
     public void delete(String email, String deviceId) {
-        redisTemplate.delete(buildKey(email, deviceId));
-        log.info("🗑️  Session deleted → email={} device={}", email, normalize(deviceId));
+
+        String normalizedEmail = normalizeEmail(email);
+        String normalizedDeviceId = normalizeDeviceId(deviceId);
+
+        String key = buildKey(normalizedEmail, normalizedDeviceId);
+
+        Boolean deleted = redisTemplate.delete(key);
+
+        if (Boolean.TRUE.equals(deleted)) {
+            log.info("Refresh session -> email={} device={}", normalizedEmail, normalizedDeviceId);
+        } else {
+            log.debug("Refresh session already absent-> email={} device={}", normalizedEmail, normalizedDeviceId);
+        }
     }
 
-      public void deleteAll(String email) {
-        Set<String> keys = redisTemplate.keys(REFRESH_PREFIX + email + ":*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-            log.info("🗑️  All sessions deleted → email={} count={}", email, keys.size());
+    public void deleteAll(String email) {
+
+        String normalizedEmail = normalizeEmail(email);
+
+        Set<String> keys = redisTemplate.keys(REFRESH_PREFIX + normalizedEmail + ":*");
+        if (keys == null && keys.isEmpty()) {
+
+            log.info("No refresh sessions found → email={}\", normalizedEmail");
+            return;
         }
+
+        redisTemplate.delete(keys);
+        log.info("All refresh sessions deleted → email={} count={}", normalizedEmail, keys.size());
     }
 
     // =========================
@@ -111,8 +177,9 @@ public class RefreshTokenRedisService {
     // =========================
 
     private String buildKey(String email, String deviceId) {
-        return REFRESH_PREFIX + email + ":" + normalize(deviceId);
+        return REFRESH_PREFIX + normalizeEmail(email) + ":" + normalizeDeviceId(deviceId);
     }
+
     private String normalize(String deviceId) {
         if (deviceId == null || deviceId.isBlank()) {
             return "WEB";
@@ -121,15 +188,31 @@ public class RefreshTokenRedisService {
     }
 
     public List<UserSession> getAllSessions(String email) {
-        Set<String> keys = redisTemplate.keys(REFRESH_PREFIX + email + ":*");
- 
+        String normalizedEmail = normalizeEmail(email);
+        Set<String> keys = redisTemplate.keys(REFRESH_PREFIX + normalizedEmail + ":*");
+
         if (keys == null || keys.isEmpty()) {
             return Collections.emptyList();
         }
- 
-        return keys.stream()
-                .map(key -> redisTemplate.opsForValue().get(key))
-                .filter(session -> session != null)
+
+        return keys.stream().map(key -> redisTemplate.opsForValue().get(key)).filter(session -> session != null)
                 .toList();
     }
+
+    private String normalizeEmail(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be null or blank");
+        }
+        return email.trim().toLowerCase();
+    }
+
+    private String normalizeDeviceId(String deviceId) {
+        if (deviceId == null || deviceId.isBlank()) {
+            return DEFAULT_DEVICE_ID;
+        }
+        return deviceId.trim().replaceAll("\\s+", "_").toUpperCase();
+    }
+
+    
+
 }

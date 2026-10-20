@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sh.sh.pos.system.configuration.JwtProvider;
 import com.sh.sh.pos.system.domain.UserRole;
@@ -30,68 +31,116 @@ public class UserServiceImpl implements UserService {
 	private final JwtProvider jwtProvider;
 
 	@Override
+	@Transactional(readOnly = true)
 	public User getUserFromJwtToken(String jwt) {
+		
+		if(jwt == null || jwt.isBlank()){
+			throw new UserException("JWT token required");
+		}
 		String email = jwtProvider.getEmailFromToken(jwt);
-		User user = userRepository.findByEmail(email);
 
-		if (user == null) {
+		if (email == null || email.isBlank()) {
 			throw new UserException("Invalid token");
 		}
-		return user;
+		return userRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("Invalid token"));
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public User getCurrentUser() {
 		Authentication authentication =
 				SecurityContextHolder.getContext().getAuthentication();
 
-		if (authentication == null || authentication.getName() == null) {
-			throw new UserException("No authenticated user in security context");
+		if (authentication == null) {
+            throw new UserException(
+                    "No authenticated user in security context"
+            );
+        }
+
+		if (!authentication.isAuthenticated()) {
+            throw new UserException(
+                    "User is not authenticated"
+            );
+        }
+
+		String email = authentication.getName();
+		if(email == null || email.isBlank()){
+			throw new UserException("No authenticated user in securitry context");
 		}
 
 		log.debug("Current authentication: name={} authorities={}",
-				authentication.getName(), authentication.getAuthorities());
+				email, authentication.getAuthorities());
 
-		User user = userRepository.findByEmail(authentication.getName());
-		if (user == null) {
-			throw new UserException(USER_NOT_FOUND);
-		}
-		return user;
+		return userRepository.findByEmail(email).orElseThrow(()-> new UserException(USER_NOT_FOUND));
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public User getUserByEmail(String email) {
-		User user = userRepository.findByEmail(email);
-		if (user == null) {
-			throw new UserException(USER_NOT_FOUND);
+		if(email == null || email.isBlank()){
+			throw new UserException("Email is required");
 		}
-		return user;
+		return userRepository.findByEmail(email).orElseThrow(()-> new UserException(USER_NOT_FOUND));
 	}
 
 	@Override
+	@Transactional(readOnly = true)
 	public User getUserById(Long id) {
-		return userRepository.findById(id).orElseThrow(
-				() -> new ResourceNotFoundException("User not found with id: " + id));
+		if (id == null) {
+            throw new ResourceNotFoundException("User ID is required");
+        }
+
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with id: " + id
+                        )
+                );
 	}
 
 	@Override
+	@Transactional (readOnly = true)
 	public List<User> getAllUser() {
 		return userRepository.findAll();
 	}
 
 	@Override
+	@Transactional (readOnly = true)
 	public Set<User> getUserByRole(UserRole role) {
-		return userRepository.findByRole(role);
+		if (role == null) {
+            throw new UserException("User role is required");
+        }
+
+        return userRepository.findByRole(role);
 	}
 
 	@Override
 	public User updateUser(UpdateUserDto updateData, User user) {
-		if (updateData.getFullName() != null) {
-			user.setFullName(updateData.getFullName());
-		}
-		if (updateData.getPhoneNumber() != null) {
-			user.setPhone(updateData.getPhoneNumber());
-		}
-		return userRepository.save(user);
+		 if (updateData == null) {
+            throw new UserException("Update data is required");
+        }
+
+        if (user == null) {
+            throw new UserException(USER_NOT_FOUND);
+        }
+
+        if (updateData.getFullName() != null
+                && !updateData.getFullName().isBlank()) {
+
+            user.setFullName(
+                    updateData.getFullName().trim()
+            );
+        }
+
+        if (updateData.getPhoneNumber() != null
+                && !updateData.getPhoneNumber().isBlank()) {
+
+            user.setPhone(
+                    updateData.getPhoneNumber().trim()
+            );
+        }
+
+        return userRepository.save(user);
 	}
 }

@@ -2,6 +2,8 @@ package com.sh.sh.pos.system.configuration;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -11,22 +13,28 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 
-import java.util.Collections;
 import java.util.List;
 
 @Configuration
-@RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
         private final CustomAuthenticationEntryPoint authEntryPoint;
 
+        private final JwtValidator jwtValidator;
+
+        public SecurityConfig(CustomAuthenticationEntryPoint authEntryPoint, JwtValidator jwtValidator) {
+                this.authEntryPoint = authEntryPoint;
+                this.jwtValidator = jwtValidator;
+        }
+
         // ── Public endpoints ──────────────────────────────────────────────────────
 
         private static final String[] PUBLIC_URLS = {
+                        "/auth/**",
                         "/api/users/forgot-password",
                         "/api/users/reset-password",
                         "/api/auth/**",
@@ -46,12 +54,20 @@ public class SecurityConfig {
                                 management -> management
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                                 .requestMatchers(PUBLIC_URLS).permitAll()
+
+                                                // Store registration can list active types
+                                                .requestMatchers(HttpMethod.GET, "/api/store-types/active").permitAll()
+
+                                                // Only Super Admin can manage store types
+                                                .requestMatchers(
+                                                                "/api/store-types",
+                                                                "/api/store-types/**")
+                                                .hasRole("ADMIN")
                                                 .requestMatchers("/api/super-admin/**").hasRole("ADMIN")
-                                                .requestMatchers("/api/**").authenticated()
-                                                
-                                                .anyRequest().permitAll())
-                                .addFilterBefore(new JwtValidator(),
+                                                .requestMatchers("/api/**").authenticated().anyRequest().denyAll())
+                                .addFilterBefore(jwtValidator,
                                                 BasicAuthenticationFilter.class)
                                 .csrf(AbstractHttpConfigurer::disable)
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -68,19 +84,40 @@ public class SecurityConfig {
         }
 
         private CorsConfigurationSource corsConfigurationSource() {
-                return (HttpServletRequest request) -> {
-                        CorsConfiguration cfg = new CorsConfiguration();
-                        cfg.setAllowedOrigins(List.of(
-                                        "http://localhost:5173", // Vite dev server
-                                        "http://localhost:3000" // React dev server
-                        ));
-                        cfg.setAllowedMethods(Collections.singletonList("*"));
-                        cfg.setAllowedHeaders(Collections.singletonList("*"));
-                        cfg.setExposedHeaders(List.of("Authorization"));
-                        cfg.setAllowCredentials(true);
-                        cfg.setMaxAge(3600L);
-                        return cfg;
-                };
+                CorsConfiguration config = new CorsConfiguration();
+
+                config.setAllowedOrigins(List.of(
+                                "http://localhost:5173",
+                                "http://localhost:3000"));
+
+                config.setAllowedMethods(List.of(
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "PATCH",
+                                "DELETE",
+                                "OPTIONS"));
+
+                config.setAllowedHeaders(List.of(
+                                "Authorization",
+                                "Content-Type",
+                                "Accept",
+                                "Origin"));
+
+                config.setExposedHeaders(List.of(
+                                "Authorization"));
+
+                config.setAllowCredentials(true);
+                config.setMaxAge(3600L);
+
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+
+                source.registerCorsConfiguration(
+                                "/**",
+                                config);
+
+                return source;
+
         }
 
 }

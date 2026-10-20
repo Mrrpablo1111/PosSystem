@@ -23,6 +23,7 @@ import com.sh.sh.pos.system.model.user.User;
 import com.sh.sh.pos.system.payload.dto.storedto.StoreDTO;
 import com.sh.sh.pos.system.repository.branchrepository.BranchRepository;
 import com.sh.sh.pos.system.repository.storerepository.StoreRepository;
+import com.sh.sh.pos.system.repository.storetyperepository.StoreTypeRepository;
 import com.sh.sh.pos.system.repository.userrepository.UserRepository;
 import com.sh.sh.pos.system.service.serviceimpl.storeserviceimpl.StoreServiceImpl;
 import com.sh.sh.pos.system.service.userservice.UserService;
@@ -31,16 +32,23 @@ import com.sh.sh.pos.system.service.userservice.UserService;
 @DisplayName("StoreServiceImpl — regression tests")
 class StoreServiceImplTest {
 
-    @Mock private StoreRepository  storeRepository;
-    @Mock private UserService      userService;
-    @Mock private BranchRepository branchRepository;
-    @Mock private UserRepository   userRepository;
-    @Mock private PasswordEncoder  passwordEncoder;
+    @Mock
+    private StoreRepository storeRepository;
+    @Mock
+    private UserService userService;
+    @Mock
+    private BranchRepository branchRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private StoreTypeRepository storeTypeRepository;
 
     @InjectMocks
     private StoreServiceImpl storeService;
 
-    private User  admin;
+    private User admin;
     private Store savedStore;
 
     @BeforeEach
@@ -64,7 +72,8 @@ class StoreServiceImplTest {
     // Fix: added user.setStore(saved) + userRepository.save(user)
     //
     // This test ensures the fix never silently regresses.
-    // If someone removes user.setStore(saved) in the future → this test FAILS immediately.
+    // If someone removes user.setStore(saved) in the future → this test FAILS
+    // immediately.
 
     @Test
     @DisplayName("createStore → admin.store is set after creation (regression)")
@@ -72,11 +81,11 @@ class StoreServiceImplTest {
         // Arrange
         StoreDTO dto = StoreDTO.builder()
                 .brand("Test Brand")
-                .storeType("Retail")
                 .description("A test store")
+                .storeTypeId(99L)
                 .build();
 
-        when(storeRepository.save(any(Store.class))).thenReturn(savedStore);
+        when(storeTypeRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Assert admin has NO store before
         assertThat(admin.getStore()).isNull();
@@ -119,8 +128,7 @@ class StoreServiceImplTest {
 
         org.junit.jupiter.api.Assertions.assertThrows(
                 ResourceNotFoundException.class,
-                () -> storeService.getStoreById(99L)
-        );
+                () -> storeService.getStoreById(99L));
     }
 
     // ── moderateStore ─────────────────────────────────────────────────────────
@@ -133,7 +141,11 @@ class StoreServiceImplTest {
 
         StoreDTO result = storeService.moderateStore(10L, StoreStatus.ACTIVE);
 
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(10L);
+        assertThat(result.getStatus()).isEqualTo(StoreStatus.ACTIVE);
         assertThat(savedStore.getStatus()).isEqualTo(StoreStatus.ACTIVE);
+
         verify(storeRepository).save(savedStore);
     }
 }
