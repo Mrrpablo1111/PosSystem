@@ -31,7 +31,7 @@ public class StoreTypeController {
     private final StoreTypeService storeTypeService;
 
     @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StoreTypeDTO> createStoreType(
             @Valid @RequestBody StoreTypeDTO storeTypeDTO) throws UserException {
 
@@ -50,7 +50,7 @@ public class StoreTypeController {
     // =========================================================
 
     @GetMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<StoreTypeDTO>> getAllStoreTypes() {
 
         return ResponseEntity.ok(
@@ -77,7 +77,7 @@ public class StoreTypeController {
     // =========================================================
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StoreTypeDTO> getStoreTypeById(
             @PathVariable @Positive Long id) throws UserException {
 
@@ -92,7 +92,7 @@ public class StoreTypeController {
     // =========================================================
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StoreTypeDTO> updateStoreType(
             @PathVariable @Positive Long id,
             @Valid @RequestBody StoreTypeDTO storeTypeDTO) throws UserException {
@@ -109,7 +109,7 @@ public class StoreTypeController {
     // =========================================================
 
     @PatchMapping("/{id}/deactivate")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StoreTypeDTO> deactivateStoreType(
             @PathVariable @Positive Long id) throws UserException {
 
@@ -124,7 +124,7 @@ public class StoreTypeController {
     // =========================================================
 
     @PatchMapping("/{id}/activate")
-    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StoreTypeDTO> activateStoreType(
             @PathVariable @Positive Long id) throws UserException {
 

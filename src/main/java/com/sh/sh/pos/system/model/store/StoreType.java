@@ -35,8 +35,8 @@ public class StoreType {
     @Column(length = 500)
     private String description;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    @Column(nullable = false)
+    private boolean active = true;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -50,6 +50,9 @@ public class StoreType {
         if(createdAt == null){
             createdAt = now;
         }
+
+        updatedAt = now;
+
     }
 
     @PreUpdate 

@@ -298,7 +298,7 @@ class StoreTypeServiceImplTest {
     @DisplayName("Get active StoreTypes returns active types")
     void getActiveStoreTypes_success() {
 
-        when(storeTypeRepository.findByIsActiveTrueOrderByNameAsc())
+        when(storeTypeRepository.findByActiveTrueOrderByNameAsc())
                 .thenReturn(List.of(storeType));
 
         when(storeTypeMapper.toDTO(storeType))

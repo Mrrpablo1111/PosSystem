@@ -80,7 +80,7 @@ public class StoreTypeServiceImpl implements StoreTypeService {
     @Override
     @Transactional(readOnly = true)
     public List<StoreTypeDTO> getActiveStoreTypes() {
-        return storeTypeRepository.findByIsActiveTrueOrderByNameAsc().stream().map(storeTypeMapper::toDTO).toList();
+        return storeTypeRepository.findByActiveTrueOrderByNameAsc().stream().map(storeTypeMapper::toDTO).toList();
     }
 
     @Override
@@ -138,7 +138,7 @@ public class StoreTypeServiceImpl implements StoreTypeService {
     public StoreTypeDTO deactivateStoreType(Long id) throws UserException {
         StoreType storeType = findStoreTypeOrThrow(id);
 
-        if(storeType.isActive()){
+        if(!storeType.isActive()){
             return storeTypeMapper.toDTO(storeType);
         }
 
@@ -150,6 +150,7 @@ public class StoreTypeServiceImpl implements StoreTypeService {
 
         return storeTypeMapper.toDTO(savedStoreType);
     }
+
 
     @Override
     public StoreTypeDTO activateStoreType(Long id) throws UserException {

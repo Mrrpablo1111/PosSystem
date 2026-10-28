@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import com.sh.sh.pos.system.exceptions.UserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -77,7 +78,7 @@ class StoreServiceImplTest {
 
     @Test
     @DisplayName("createStore → admin.store is set after creation (regression)")
-    void createStore_linksAdminStoreId() {
+    void createStore_linksAdminStoreId() throws UserException {
         // Arrange
         StoreDTO dto = StoreDTO.builder()
                 .brand("Test Brand")
@@ -112,7 +113,7 @@ class StoreServiceImplTest {
 
     @Test
     @DisplayName("getStoreById → found → returns DTO")
-    void getStoreById_found() throws ResourceNotFoundException {
+    void getStoreById_found() throws ResourceNotFoundException, UserException {
         when(storeRepository.findById(10L)).thenReturn(Optional.of(savedStore));
 
         StoreDTO result = storeService.getStoreById(10L);
@@ -135,7 +136,7 @@ class StoreServiceImplTest {
 
     @Test
     @DisplayName("moderateStore → updates status → saves correctly")
-    void moderateStore_updatesStatus() throws ResourceNotFoundException {
+    void moderateStore_updatesStatus() throws ResourceNotFoundException, UserException {
         when(storeRepository.findById(10L)).thenReturn(Optional.of(savedStore));
         when(storeRepository.save(any(Store.class))).thenReturn(savedStore);
 

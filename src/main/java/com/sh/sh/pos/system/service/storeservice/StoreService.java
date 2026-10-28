@@ -5,27 +5,27 @@ import java.util.List;
 import com.sh.sh.pos.system.domain.StoreStatus;
 import com.sh.sh.pos.system.exception.ResourceNotFoundException;
 import com.sh.sh.pos.system.exceptions.UserException;
-import com.sh.sh.pos.system.model.store.Store;
 import com.sh.sh.pos.system.model.user.User;
 import com.sh.sh.pos.system.payload.dto.storedto.StoreDTO;
 import com.sh.sh.pos.system.payload.dto.userdto.UserDTO;
 
 public interface StoreService {
-	StoreDTO createStore(StoreDTO storeDTO, User user);
+	StoreDTO createStore(StoreDTO storeDTO, User user) throws UserException;
 
-	StoreDTO getStoreById(Long id) throws ResourceNotFoundException;
+	StoreDTO getStoreById(Long id) throws ResourceNotFoundException, UserException;
 
-	List<StoreDTO> getAllStores(StoreStatus status);
+	List<StoreDTO> getAllStores(StoreStatus status) throws UserException;
 
-	Store getStoreByAdminId() throws UserException;
+	StoreDTO getStoreByAdminId() throws UserException;
 
 	StoreDTO updateStore(Long id, StoreDTO storeDTO) throws ResourceNotFoundException, UserException;
 
-	void deletedStore() throws UserException, ResourceNotFoundException;
+	void deactivateStore(Long id) throws UserException, ResourceNotFoundException;
+
 	StoreDTO getStoreByEmployee() throws UserException;
 	List<UserDTO> getEmployeesByStore(Long storeId) throws UserException;
 
-	StoreDTO moderateStore(Long storeId, StoreStatus status) throws ResourceNotFoundException;
+	StoreDTO moderateStore(Long storeId, StoreStatus status) throws ResourceNotFoundException, UserException;
 
     UserDTO addEmployee(Long id, UserDTO userDto) throws UserException;
 

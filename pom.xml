@@ -188,6 +188,21 @@
 				</configuration>
 			</plugin>
 
+			<!-- Add Flyway Maven plugin here -->
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>11.7.2</version>
+				<configuration>
+					<url>jdbc:mysql://localhost:3306/pos_system?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC</url>
+					<user>pos_system</user>
+					<password>${env.POS_DB_PASSWORD}</password>
+					<locations>
+						<location>filesystem:src/main/resources/db/migration</location>
+					</locations>
+				</configuration>
+			</plugin>
+
 			<!-- SonarQube Scanner -->
 			<plugin>
 				<groupId>org.sonarsource.scanner.maven</groupId>

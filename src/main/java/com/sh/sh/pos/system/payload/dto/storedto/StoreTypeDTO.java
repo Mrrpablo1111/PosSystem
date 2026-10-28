@@ -29,7 +29,7 @@ public class StoreTypeDTO {
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
 
-    private boolean isActive;
+    private boolean active;
 
     
 }

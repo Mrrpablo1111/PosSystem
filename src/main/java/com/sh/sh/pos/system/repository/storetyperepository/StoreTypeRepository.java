@@ -19,7 +19,7 @@ public interface StoreTypeRepository extends JpaRepository<StoreType, Long>{
 
     boolean existsByNameIgnoreCase(String name);
 
-    List<StoreType> findByIsActiveTrueOrderByNameAsc();
+    List<StoreType> findByActiveTrueOrderByNameAsc();
 
     List<StoreType> findAllByOrderByNameAsc();
 }

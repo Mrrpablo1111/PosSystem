@@ -15,21 +15,20 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
 @Configuration
 @EnableMethodSecurity
+@RequiredArgsConstructor 
 public class SecurityConfig {
 
         private final CustomAuthenticationEntryPoint authEntryPoint;
 
         private final JwtValidator jwtValidator;
 
-        public SecurityConfig(CustomAuthenticationEntryPoint authEntryPoint, JwtValidator jwtValidator) {
-                this.authEntryPoint = authEntryPoint;
-                this.jwtValidator = jwtValidator;
-        }
+    
 
         // ── Public endpoints ──────────────────────────────────────────────────────
 

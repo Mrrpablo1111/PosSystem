@@ -3,6 +3,7 @@ package com.sh.sh.pos.system.service.serviceimpl.userserviceimpl;
 import java.util.List;
 import java.util.Set;
 
+import com.sh.sh.pos.system.security.UserPrincipal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -52,27 +53,39 @@ public class UserServiceImpl implements UserService {
 		Authentication authentication =
 				SecurityContextHolder.getContext().getAuthentication();
 
-		if (authentication == null) {
-            throw new UserException(
-                    "No authenticated user in security context"
-            );
-        }
+		if (authentication == null
+				|| !authentication.isAuthenticated()
+				|| authentication.getPrincipal() == null
+				|| "anonymousUser".equals(authentication.getPrincipal())) {
 
-		if (!authentication.isAuthenticated()) {
-            throw new UserException(
-                    "User is not authenticated"
-            );
-        }
-
-		String email = authentication.getName();
-		if(email == null || email.isBlank()){
-			throw new UserException("No authenticated user in securitry context");
+			throw new UserException("No authenticated user in security context");
 		}
 
-		log.debug("Current authentication: name={} authorities={}",
-				email, authentication.getAuthorities());
+		Object principal = authentication.getPrincipal();
 
-		return userRepository.findByEmail(email).orElseThrow(()-> new UserException(USER_NOT_FOUND));
+		if(!(principal instanceof UserPrincipal userPrincipal)){
+			throw new UserException("Invalid authentication");
+		}
+
+		Long userId = userPrincipal.getId();
+
+		if(userId == null){
+			throw new UserException("Authentication user ID is missing");
+		}
+		return userRepository.findById(userId)
+				.orElseThrow(() ->
+						new ResourceNotFoundException("User not found with id: " + userId)
+				);
+
+//		String email = authentication.getName();
+//		if(email == null || email.isBlank()){
+//			throw new UserException("No authenticated user in securitry context");
+//		}
+//
+//		log.debug("Current authentication: name={} authorities={}",
+//				email, authentication.getAuthorities());
+//
+//		return userRepository.findByEmail(email).orElseThrow(()-> new UserException(USER_NOT_FOUND));
 	}
 
 	@Override
